@@ -3,8 +3,8 @@ import React from 'react';
 import { BlurView } from 'expo-blur';
 import { Platform, View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '../../constants/theme';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -21,9 +21,18 @@ export default function TabLayout() {
           backgroundColor: Colors[colorScheme ?? 'dark'].tabBar,
           borderTopWidth: 0,
           elevation: 0,
-          height: 65,
-          paddingBottom: 10,
-          paddingTop: 10,
+          height: 80,
+          paddingBottom: 20,
+          paddingTop: 12,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+        },
+        tabBarLabelStyle: {
+           fontSize: 10,
+           fontWeight: '600',
+           marginTop: 4,
         },
         tabBarBackground: () => (
           Platform.OS === 'ios' ? (

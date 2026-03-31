@@ -11,8 +11,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '../../constants/theme';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 
 const { width } = Dimensions.get('window');
 

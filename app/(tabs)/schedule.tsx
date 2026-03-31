@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '../../constants/theme';
+import { useColorScheme } from '../../hooks/use-color-scheme';
 
 const { width } = Dimensions.get('window');
 
