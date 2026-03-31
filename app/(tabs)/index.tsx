@@ -13,12 +13,14 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
 import { Colors } from '../../constants/theme';
 import { useColorScheme } from '../../hooks/use-color-scheme';
+import { useMenu } from '../../context/MenuContext';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
+  const { openMenu } = useMenu();
 
 const stats: { id: number; label: string; value: string; icon: any; color: [string, string] }[] = [
     { id: 1, label: 'Enquiries', value: '24', icon: 'mail-outline', color: ['#D4AF37', '#B5942B'] },
@@ -37,9 +39,14 @@ const stats: { id: number; label: string; value: string; icon: any; color: [stri
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Good Morning,</Text>
-          <Text style={styles.userName}>PhotoCorp Admin</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity onPress={openMenu} style={styles.menuBtn}>
+            <Ionicons name="menu" size={28} color={theme.text} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.greeting}>Good Morning,</Text>
+            <Text style={[styles.userName, { color: theme.text }]}>PhotoCorp Admin</Text>
+          </View>
         </View>
         <TouchableOpacity style={styles.notificationBtn}>
           <Ionicons name="notifications-outline" size={24} color={theme.text} />
@@ -138,6 +145,13 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 22,
     fontWeight: 'bold',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuBtn: {
+    marginRight: 15,
   },
   notificationBtn: {
     width: 45,

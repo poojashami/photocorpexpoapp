@@ -6,76 +6,93 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
 import { useColorScheme } from '../../hooks/use-color-scheme';
 
-export default function TabLayout() {
+import { MenuProvider } from '../../context/MenuContext';
+import { SidebarOverlay } from '../../components/SidebarOverlay';
+
+// We wrap the tabs inside the MenuProvider to allow Context usage
+function TabLayoutInner() {
   const colorScheme = useColorScheme();
   const activeColor = Colors[colorScheme ?? 'dark'].tint;
   const inactiveColor = '#888';
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: activeColor,
-        tabBarInactiveTintColor: inactiveColor,
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'dark'].tabBar,
-          borderTopWidth: 0,
-          elevation: 0,
-          height: 80,
-          paddingBottom: 20,
-          paddingTop: 12,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-        },
-        tabBarLabelStyle: {
-           fontSize: 10,
-           fontWeight: '600',
-           marginTop: 4,
-        },
-        tabBarBackground: () => (
-          Platform.OS === 'ios' ? (
-            <BlurView intensity={80} style={StyleSheet.absoluteFill} tint="dark" />
-          ) : null
-        ),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "grid" : "grid-outline"} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="enquiries"
-        options={{
-          title: 'Enquiries',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "mail" : "mail-outline"} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="schedule"
-        options={{
-          title: 'Booking',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="people"
-        options={{
-          title: 'People',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "people" : "people-outline"} size={24} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    <View style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'dark'].background }}>
+        <Tabs
+        screenOptions={{
+            tabBarActiveTintColor: activeColor,
+            tabBarInactiveTintColor: inactiveColor,
+            headerShown: false,
+            tabBarStyle: {
+            backgroundColor: Colors[colorScheme ?? 'dark'].tabBar,
+            borderTopWidth: 0,
+            elevation: 0,
+            height: 80,
+            paddingBottom: 20,
+            paddingTop: 12,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            },
+            tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '600',
+            marginTop: 4,
+            },
+            tabBarBackground: () => (
+            Platform.OS === 'ios' ? (
+                <BlurView intensity={80} style={StyleSheet.absoluteFill} tint="dark" />
+            ) : null
+            ),
+        }}>
+        <Tabs.Screen
+            name="index"
+            options={{
+            title: 'Dashboard',
+            tabBarIcon: ({ color, focused }) => (
+                <Ionicons name={focused ? "grid" : "grid-outline"} size={24} color={color} />
+            ),
+            }}
+        />
+        <Tabs.Screen
+            name="enquiries"
+            options={{
+            title: 'Enquiries',
+            tabBarIcon: ({ color, focused }) => (
+                <Ionicons name={focused ? "mail" : "mail-outline"} size={24} color={color} />
+            ),
+            }}
+        />
+        <Tabs.Screen
+            name="schedule"
+            options={{
+            title: 'Booking',
+            tabBarIcon: ({ color, focused }) => (
+                <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
+            ),
+            }}
+        />
+        <Tabs.Screen
+            name="people"
+            options={{
+            title: 'People',
+            tabBarIcon: ({ color, focused }) => (
+                <Ionicons name={focused ? "people" : "people-outline"} size={24} color={color} />
+            ),
+            }}
+        />
+        </Tabs>
+        
+        {/* Render the Sidebar overlay */}
+        <SidebarOverlay />
+    </View>
+  );
+}
+
+export default function TabLayout() {
+  return (
+    <MenuProvider>
+       <TabLayoutInner />
+    </MenuProvider>
   );
 }
