@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { Colors } from '../../constants/theme';
 import { useColorScheme } from '../../hooks/use-color-scheme';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +29,7 @@ export default function EnquiriesScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
   const [search, setSearch] = useState('');
+  const router = useRouter();
 
   const renderEnquiryItem = ({ item, index }: { item: any; index: number }) => (
     <Animated.View entering={FadeInRight.delay(index * 100).duration(500)}>
@@ -82,7 +84,10 @@ export default function EnquiriesScreen() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>Enquiries</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: theme.tint }]}>
+        <TouchableOpacity 
+          style={[styles.addBtn, { backgroundColor: theme.tint }]}
+          onPress={() => router.push('/add-enquiry')}
+        >
           <Ionicons name="add" size={24} color="#000" />
         </TouchableOpacity>
       </View>

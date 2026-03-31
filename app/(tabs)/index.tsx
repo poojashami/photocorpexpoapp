@@ -10,29 +10,120 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Colors } from '../../constants/theme';
 import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useMenu } from '../../context/MenuContext';
 
 const { width } = Dimensions.get('window');
 
+// 1. Premium Mini Stat Card (Gold/Dark Theme)
+const MiniStatCard = ({ title, value, icon, gradient }: any) => {
+    return (
+        <LinearGradient 
+            colors={gradient || ['rgba(212, 175, 55, 0.15)', 'rgba(212, 175, 55, 0.05)']} 
+            style={styles.miniStatCard}
+            start={{x: 0, y: 0}} end={{x: 1, y: 1}}
+        >
+            <View style={styles.miniStatIconBox}>
+                <Ionicons name={icon} size={18} color="#D4AF37" />
+            </View>
+            <Text style={styles.miniStatValue}>{value}</Text>
+            <Text style={styles.miniStatTitle}>{title}</Text>
+        </LinearGradient>
+    );
+};
+
+// 2. Horizontal Scroll Notification Card (Glassmorphic)
+const NotificationCard = ({ title, items, icon, accentColor }: any) => {
+    return (
+        <View style={styles.notificationCard}>
+            <View style={styles.notifHeader}>
+                <View style={[styles.notifIconCircle, { backgroundColor: accentColor + '20' }]}>
+                    <Ionicons name={icon} size={16} color={accentColor} />
+                </View>
+                <Text style={styles.notifTitle}>{title}</Text>
+            </View>
+            <View style={styles.notifBody}>
+                {items.length > 0 ? items.map((item: any, idx: number) => (
+                    <View key={idx} style={styles.notifItem}>
+                        <View style={[styles.notifDot, { backgroundColor: accentColor }]} />
+                        <Text style={styles.notifText} numberOfLines={2}>{item}</Text>
+                    </View>
+                )) : (
+                    <Text style={styles.emptyText}>Nothing scheduled for today.</Text>
+                )}
+            </View>
+        </View>
+    );
+}
+
+// 3. Sleek Analytics Bar Segment
+const AnalyticsCard = ({ title, icon, data }: any) => {
+    const maxVal = Math.max(...data.map((d: any) => d.value));
+
+    return (
+        <View style={styles.analyticsCard}>
+            <View style={styles.analyticsHeader}>
+                <Ionicons name={icon} size={20} color="#D4AF37" style={{ marginRight: 10 }} />
+                <Text style={styles.analyticsTitle}>{title}</Text>
+            </View>
+            <View style={styles.analyticsBody}>
+                {data.map((item: any, index: number) => (
+                <View key={index} style={styles.barContainer}>
+                    <View style={styles.barLabelRow}>
+                        <Text style={styles.barLabel}>{item.label}</Text>
+                        <Text style={styles.barValue}>{item.value}</Text>
+                    </View>
+                    <View style={styles.barBackground}>
+                        <Animated.View style={[
+                            styles.barFill, 
+                            { width: `${(item.value / maxVal) * 100}%`, backgroundColor: item.color || '#D4AF37' }
+                        ]} />
+                    </View>
+                </View>
+                ))}
+            </View>
+        </View>
+    );
+}
+
 export default function DashboardScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
   const { openMenu } = useMenu();
 
-const stats: { id: number; label: string; value: string; icon: any; color: [string, string] }[] = [
-    { id: 1, label: 'Enquiries', value: '24', icon: 'mail-outline', color: ['#D4AF37', '#B5942B'] },
-    { id: 2, label: 'Bookings', value: '12', icon: 'calendar-outline', color: ['#4A90E2', '#357ABD'] },
-    { id: 3, label: 'Revenue', value: '₹4.2L', icon: 'cash-outline', color: ['#4CAF50', '#388E3C'] },
+  // --- MOCK DATA ---
+  const crewTypeData = [
+    { label: 'Photographer', value: 45, color: '#4facfe' },
+    { label: 'Assistant', value: 30, color: '#00f2fe' },
+    { label: 'Editor', value: 25, color: '#a8edea' },
   ];
 
-  const recentEvents = [
-    { id: 1, type: 'Wedding', client: 'Sharma Wedding', date: '25 Oct, 2025', status: 'Upcoming' },
-    { id: 2, type: 'Pre-Wedding', client: 'Aryan & Ishita', date: '12 Nov, 2025', status: 'Pending' },
-    { id: 3, type: 'Event', client: 'Corporate Gala', date: '05 Dec, 2025', status: 'Confirmed' },
-    { id: 4, type: 'Birthday', client: 'Aarav 1st BDay', date: '15 Dec, 2025', status: 'Upcoming' },
+  const cityBookingData = [
+    { label: 'Mumbai', value: 210, color: '#ff9a9e' },
+    { label: 'Pune', value: 150, color: '#fecfef' },
+    { label: 'Delhi', value: 110, color: '#f5576c' },
+  ];
+
+  const paymentData = [
+    { label: 'Total Revenue', value: 500000, color: '#4CAF50' },
+    { label: 'Advance', value: 250000, color: '#8BC34A' },
+    { label: 'Balance', value: 200000, color: '#FFC107' },
+  ];
+
+  const todaysBirthdays = [
+    'Rahul Sharma (28th) - CUST-101',
+    'Priya Singh (25th) - CUST-304'
+  ];
+
+  const todaysAnniversaries = [
+    'Varma Couple (5th) - CUST-223'
+  ];
+
+  const todaysEvents = [
+    'Sharma Wedding - Haldi (EVT-892)',
+    'Corporate Gala Dinner (EVT-931)'
   ];
 
   return (
@@ -48,79 +139,75 @@ const stats: { id: number; label: string; value: string; icon: any; color: [stri
             <Text style={[styles.userName, { color: theme.text }]}>PhotoCorp Admin</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.notificationBtn}>
-          <Ionicons name="notifications-outline" size={24} color={theme.text} />
-          <View style={styles.badge} />
+        <TouchableOpacity style={styles.profileBtn}>
+            <Ionicons name="person" size={20} color="#000" />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Stats Section */}
-        <View style={styles.statsContainer}>
-          {stats.map((stat, index) => (
-            <Animated.View 
-              key={stat.id}
-              entering={FadeInRight.delay(index * 100).duration(800)}
+        
+        {/* STATS OVERVIEW - Masonry style grid */}
+        <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.statsGrid}>
+            <MiniStatCard title="Total Enquiries" value="1,284" icon="mail-unread" />
+            <MiniStatCard title="Active Bookings" value="142" icon="calendar" />
+            <MiniStatCard title="Revenue (M)" value="₹ 4.2 L" icon="wallet" />
+            <MiniStatCard title="Pending Tasks" value="18" icon="list" />
+        </Animated.View>
+
+        <Text style={styles.sectionHeader}>Today's Highlights</Text>
+
+        {/* HORIZONTAL NOTIFICATIONS - Clean and modern */}
+        <Animated.View entering={FadeInRight.delay(200).duration(700)}>
+            <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={styles.horizontalScroll}
+                snapToInterval={width * 0.75 + 15}
+                decelerationRate="fast"
             >
-              <TouchableOpacity>
-                <LinearGradient colors={stat.color} style={styles.statCard}>
-                  <Ionicons name={stat.icon} size={24} color="#000" />
-                  <Text style={styles.statValue}>{stat.value}</Text>
-                  <Text style={styles.statLabel}>{stat.label}</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
-        </View>
+                <NotificationCard 
+                    title="Events Today" 
+                    icon="calendar" 
+                    accentColor="#4facfe" 
+                    items={todaysEvents} 
+                />
+                <NotificationCard 
+                    title="Birthdays" 
+                    icon="gift" 
+                    accentColor="#FF6B6B" 
+                    items={todaysBirthdays} 
+                />
+                <NotificationCard 
+                    title="Anniversaries" 
+                    icon="heart" 
+                    accentColor="#FF69B4" 
+                    items={todaysAnniversaries} 
+                />
+            </ScrollView>
+        </Animated.View>
 
-        {/* Action Grid */}
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Quick Actions</Text>
-        <View style={styles.actionGrid}>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: theme.card }]}>
-            <Ionicons name="person-add-outline" size={24} color={theme.tint} />
-            <Text style={[styles.actionText, { color: theme.text }]}>Add Client</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: theme.card }]}>
-            <Ionicons name="create-outline" size={24} color={theme.tint} />
-            <Text style={[styles.actionText, { color: theme.text }]}>New Enquiry</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: theme.card }]}>
-            <Ionicons name="images-outline" size={24} color={theme.tint} />
-            <Text style={[styles.actionText, { color: theme.text }]}>Portfolio</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: theme.card }]}>
-            <Ionicons name="settings-outline" size={24} color={theme.tint} />
-            <Text style={[styles.actionText, { color: theme.text }]}>Settings</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={[styles.sectionHeader, { marginTop: 30 }]}>Analytics Hub</Text>
 
-        {/* Recent Events */}
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent Events</Text>
-          <TouchableOpacity>
-            <Text style={{ color: theme.tint }}>View All</Text>
-          </TouchableOpacity>
-        </View>
+        {/* ANALYTICS VERTICAL STACK - Deep dark theme mapping */}
+        <Animated.View entering={FadeInUp.delay(300).duration(800)}>
+            <AnalyticsCard 
+                title="Crew Demographics" 
+                icon="people" 
+                data={crewTypeData} 
+            />
+            <AnalyticsCard 
+                title="City Dominance" 
+                icon="business" 
+                data={cityBookingData} 
+            />
+            <AnalyticsCard 
+                title="Financial Distribution" 
+                icon="cash" 
+                data={paymentData} 
+            />
+        </Animated.View>
 
-        {recentEvents.map((event, index) => (
-          <Animated.View 
-            key={event.id}
-            entering={FadeInDown.delay(index * 150 + 400).duration(800)}
-          >
-            <TouchableOpacity style={[styles.eventCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-              <View style={[styles.eventTypeIcon, { backgroundColor: 'rgba(212, 175, 55, 0.1)' }]}>
-                <Ionicons name="camera" size={20} color={theme.tint} />
-              </View>
-              <View style={styles.eventInfo}>
-                <Text style={[styles.eventClient, { color: theme.text }]}>{event.client}</Text>
-                <Text style={styles.eventType}>{event.type} • {event.date}</Text>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: event.status === 'Upcoming' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(212, 175, 55, 0.1)' }]}>
-                <Text style={[styles.statusText, { color: event.status === 'Upcoming' ? '#4CAF50' : '#D4AF37' }]}>{event.status}</Text>
-              </View>
-            </TouchableOpacity>
-          </Animated.View>
-        ))}
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -136,11 +223,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 25,
+    marginBottom: 20,
   },
   greeting: {
-    color: '#888',
-    fontSize: 14,
+    color: '#aaa',
+    fontSize: 13,
   },
   userName: {
     fontSize: 22,
@@ -153,119 +240,170 @@ const styles = StyleSheet.create({
   menuBtn: {
     marginRight: 15,
   },
-  notificationBtn: {
-    width: 45,
-    height: 45,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-  },
-  badge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FF4B4B',
-    borderWidth: 1.5,
-    borderColor: '#0F0F0F',
+  profileBtn: {
+      width: 40, 
+      height: 40, 
+      borderRadius: 20, 
+      backgroundColor: '#D4AF37',
+      justifyContent: 'center',
+      alignItems: 'center'
   },
   scrollContent: {
-    paddingBottom: 30,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginBottom: 25,
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    width: (width - 60) / 3,
-    padding: 15,
-    borderRadius: 20,
-    alignItems: 'flex-start',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginTop: 10,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: 'rgba(0,0,0,0.6)',
-    fontWeight: '600',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginHorizontal: 20,
-    marginBottom: 15,
-  },
-  actionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 15,
-    marginBottom: 25,
-  },
-  actionBtn: {
-    width: (width - 50) / 2,
-    margin: 5,
-    padding: 20,
-    borderRadius: 18,
-    alignItems: 'center',
-  },
-  actionText: {
-    marginTop: 10,
-    fontSize: 14,
-    fontWeight: '600',
+    paddingBottom: 20,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingRight: 20,
-    marginBottom: 10,
+      color: '#FFF',
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginHorizontal: 20,
+      marginTop: 10,
+      marginBottom: 15,
+      letterSpacing: 0.5,
   },
-  eventCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginBottom: 12,
-    padding: 15,
-    borderRadius: 18,
-    borderWidth: 1,
+  statsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      paddingHorizontal: 15,
+      justifyContent: 'space-between',
+      marginBottom: 15,
   },
-  eventTypeIcon: {
-    width: 45,
-    height: 45,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+  miniStatCard: {
+      width: (width - 45) / 2, // 2 columns
+      padding: 16,
+      borderRadius: 16,
+      marginBottom: 15,
+      borderWidth: 1,
+      borderColor: 'rgba(212, 175, 55, 0.2)',
   },
-  eventInfo: {
-    flex: 1,
-    marginLeft: 15,
+  miniStatIconBox: {
+      width: 34,
+      height: 34,
+      borderRadius: 10,
+      backgroundColor: 'rgba(212, 175, 55, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 12,
   },
-  eventClient: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  miniStatValue: {
+      color: '#FFF',
+      fontSize: 22,
+      fontWeight: 'bold',
+      marginBottom: 4,
   },
-  eventType: {
-    color: '#888',
-    fontSize: 13,
-    marginTop: 2,
+  miniStatTitle: {
+      color: '#aaa',
+      fontSize: 12,
+      fontWeight: '600',
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
+  horizontalScroll: {
+      paddingHorizontal: 20,
+      gap: 15,
   },
-  statusText: {
-    fontSize: 11,
-    fontWeight: 'bold',
+  notificationCard: {
+      width: width * 0.75, // Swipable cards
+      backgroundColor: 'rgba(255,255,255,0.03)',
+      borderRadius: 20,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)',
   },
+  notifHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 15,
+  },
+  notifIconCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 10,
+  },
+  notifTitle: {
+      color: '#FFF',
+      fontSize: 16,
+      fontWeight: 'bold',
+  },
+  notifBody: {
+      minHeight: 80,
+  },
+  notifItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: 10,
+  },
+  notifDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      marginTop: 6,
+      marginRight: 10,
+  },
+  notifText: {
+      color: '#E0E0E0',
+      fontSize: 14,
+      flex: 1,
+      lineHeight: 20,
+  },
+  emptyText: {
+      color: '#777',
+      fontStyle: 'italic',
+      fontSize: 13,
+  },
+  analyticsCard: {
+      marginHorizontal: 20,
+      backgroundColor: 'rgba(255,255,255,0.02)',
+      borderRadius: 20,
+      padding: 20,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.08)',
+  },
+  analyticsHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255,255,255,0.05)',
+      paddingBottom: 15,
+  },
+  analyticsTitle: {
+      color: '#FFF',
+      fontSize: 16,
+      fontWeight: 'bold',
+      letterSpacing: 0.5,
+  },
+  analyticsBody: {
+      marginTop: 5,
+  },
+  barContainer: {
+      marginBottom: 16,
+  },
+  barLabelRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+  },
+  barLabel: {
+      color: '#ccc',
+      fontSize: 13,
+      fontWeight: '500',
+  },
+  barValue: {
+      color: '#FFF',
+      fontSize: 14,
+      fontWeight: 'bold',
+  },
+  barBackground: {
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: 'rgba(255,255,255,0.06)',
+      width: '100%',
+      overflow: 'hidden',
+  },
+  barFill: {
+      height: '100%',
+      borderRadius: 3,
+  }
 });

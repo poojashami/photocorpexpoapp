@@ -173,6 +173,18 @@ export const SidebarOverlay = () => {
               <MenuItem icon="document" label="Report" isNested />
           </MenuItem>
 
+          {/* Reports */}
+          <MenuItem icon="folder-open" label="Reports">
+             <MenuItem icon="clipboard" label="Crew Reports" isNested />
+             <MenuItem icon="calendar" label="Crew Ceremony" isNested />
+             <MenuItem icon="calendar" label="Crew Event" isNested />
+             <MenuItem icon="people" label="Customer Reports" isNested />
+             <MenuItem icon="document-text" label="Enquiry Reports" isNested onPress={() => navigateTo('/enquiry-report')} />
+             <MenuItem icon="analytics" label="Event Reports" isNested />
+             <MenuItem icon="pie-chart" label="Profit Loss Reports" isNested />
+             <MenuItem icon="document" label="Quotation Reports" isNested />
+          </MenuItem>
+
           {/* Counter Booking */}
           <MenuItem icon="storefront" label="Counter Booking">
              <MenuItem icon="cash" label="Material Master" isNested />
