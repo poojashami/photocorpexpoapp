@@ -10,22 +10,55 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { Storage } from '../../utils/storage';
+
+const API_BASE_URL = 'http://10.64.185.100:8000/api'; // Updated to Mobile Hotspot IP for Network Access
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Enter Details');
+      Alert.alert('Error', 'Please enter your username and password');
       return;
     }
-    // Hardcoded simple login
-    if (email === 'admin' && password === 'admin') {
-      router.replace('/(tabs)');
-    } else {
-       router.replace('/(tabs)');
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
+
+      const response = await axios.post(`${API_BASE_URL}/user/login`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
+        },
+      });
+
+      console.log('API Response:', response.data);
+
+      if (response.data.status == "200" || response.data.status == 200) {
+        await Storage.setItem('userToken', response.data.token);
+        await Storage.setItem('userData', JSON.stringify(response.data.user));
+        await Storage.setItem('companyId', String(response.data.user.company_id));
+        if (response.data.menuIds) {
+          await Storage.setItem('menuIds', JSON.stringify(response.data.menuIds));
+        }
+        setTimeout(() => { router.replace('/(tabs)'); }, 100);
+      } else {
+        Alert.alert('Login Failed', response.data.message || 'Invalid credentials');
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMsg = error.response?.data?.message || 'Connection failed. Please check if your server is running.';
+      Alert.alert('Error', errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,10 +110,11 @@ export default function LoginScreen() {
             />
             
             <TouchableOpacity 
-              style={styles.button} 
+              style={[styles.button, loading && { opacity: 0.7 }]} 
               onPress={handleLogin}
+              disabled={loading}
             >
-              <Text style={styles.buttonText}>SIGN IN</Text>
+              <Text style={styles.buttonText}>{loading ? 'SIGNING IN...' : 'SIGN IN'}</Text>
             </TouchableOpacity>
           </View>
 

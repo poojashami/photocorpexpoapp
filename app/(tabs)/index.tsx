@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,8 +15,12 @@ import Animated, { FadeInDown, FadeInRight, FadeInUp } from 'react-native-reanim
 import { Colors } from '../../constants/theme';
 import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useMenu } from '../../context/MenuContext';
+import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { Storage } from '../../utils/storage';
 
 const { width } = Dimensions.get('window');
+const API_BASE_URL = 'http://10.64.185.100:8000/api';
 
 // 1. Premium Mini Stat Card (Gold/Dark Theme)
 const MiniStatCard = ({ title, value, icon, gradient }: any) => {
@@ -92,6 +97,31 @@ export default function DashboardScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'dark'];
   const { openMenu } = useMenu();
+  const router = useRouter();
+  const [profileDropdown, setProfileDropdown] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    Storage.getItem('userData').then(data => {
+      if (data) setUserData(JSON.parse(data));
+    });
+  }, []);
+
+  const handleLogout = async () => {
+    setProfileDropdown(false);
+    await Storage.clear(); // clear immediately so no stale state
+    try {
+      const token = await Storage.getItem('userToken');
+      if (token) {
+        axios.post(`${API_BASE_URL}/user/logout`, {}, {
+          headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
+        }).catch(() => {}); // fire-and-forget
+      }
+    } catch (e) {}
+    // Reset entire navigation stack to login page
+    router.dismissAll();
+    router.replace('/(auth)');
+  };
 
   // --- MOCK DATA ---
   const crewTypeData = [
@@ -136,13 +166,49 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <View>
             <Text style={styles.greeting}>Good Morning,</Text>
-            <Text style={[styles.userName, { color: theme.text }]}>PhotoCorp Admin</Text>
+            <Text style={[styles.userName, { color: theme.text }]}>{userData?.name || 'Admin'}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.profileBtn}>
-            <Ionicons name="person" size={20} color="#000" />
+
+        {/* Profile Button */}
+        <TouchableOpacity style={styles.profileBtn} onPress={() => setProfileDropdown(true)}>
+          <Ionicons name="person" size={20} color="#000" />
         </TouchableOpacity>
       </View>
+
+      {/* Profile Dropdown Modal */}
+      <Modal
+        visible={profileDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setProfileDropdown(false)}
+      >
+        <TouchableOpacity style={styles.dropOverlay} activeOpacity={1} onPress={() => setProfileDropdown(false)}>
+          <View style={styles.dropCard}>
+            {/* User Info */}
+            <View style={styles.dropUserInfo}>
+              <View style={styles.dropAvatar}>
+                <Ionicons name="person" size={28} color="#000040" />
+              </View>
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Text style={styles.dropName}>{userData?.name || 'Admin'}</Text>
+                <Text style={styles.dropEmail} numberOfLines={1}>{userData?.email || ''}</Text>
+                <View style={styles.roleBadge}>
+                  <Text style={styles.roleText}>{userData?.role?.toUpperCase() || 'USER'}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.dropDivider} />
+
+            {/* Logout */}
+            <TouchableOpacity style={styles.dropLogout} onPress={handleLogout}>
+              <Ionicons name="log-out" size={20} color="#FF4B4B" />
+              <Text style={styles.dropLogoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
@@ -405,5 +471,86 @@ const styles = StyleSheet.create({
   barFill: {
       height: '100%',
       borderRadius: 3,
-  }
+  },
+  // --- Profile Dropdown Styles ---
+  dropOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: Platform.OS === 'ios' ? 100 : 80,
+    paddingRight: 15,
+  },
+  dropCard: {
+    backgroundColor: '#0A0A40',
+    borderRadius: 16,
+    padding: 18,
+    width: 240,
+    borderWidth: 1,
+    borderColor: 'rgba(212,175,55,0.3)',
+    shadowColor: '#000',
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 15,
+  },
+  dropUserInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  dropAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#D4AF37',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropName: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  dropEmail: {
+    color: '#aaa',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  roleBadge: {
+    marginTop: 5,
+    backgroundColor: 'rgba(212,175,55,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(212,175,55,0.4)',
+  },
+  roleText: {
+    color: '#D4AF37',
+    fontSize: 10,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  dropDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    marginBottom: 14,
+  },
+  dropLogout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    backgroundColor: 'rgba(255,75,75,0.08)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,75,75,0.3)',
+  },
+  dropLogoutText: {
+    color: '#FF4B4B',
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginLeft: 12,
+  },
 });

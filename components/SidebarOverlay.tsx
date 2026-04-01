@@ -15,6 +15,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMenu } from '../context/MenuContext';
 import { Colors } from '../constants/theme';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
+import { Storage } from '../utils/storage';
+import { Alert } from 'react-native';
+
+const API_BASE_URL = 'http://10.64.185.100:8000/api';
 
 const { width, height } = Dimensions.get('window');
 const SIDEBAR_WIDTH = width * 0.75;
@@ -102,6 +107,38 @@ export const SidebarOverlay = () => {
       router.push(path);
   }
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Logout',
+      'Kya aap logout karna chahte hain?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await Storage.clear();
+            closeMenu();
+            try {
+              const token = await Storage.getItem('userToken');
+              if (token) {
+                axios.post(`${API_BASE_URL}/user/logout`, {}, {
+                  headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  },
+                }).catch(() => {}); // fire-and-forget
+              }
+            } catch (e) {}
+            // Reset entire navigation stack to login page
+            router.dismissAll();
+            router.replace('/(auth)');
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents={isMenuOpen ? "auto" : "none"}>
       {/* Backdrop */}
@@ -148,30 +185,17 @@ export const SidebarOverlay = () => {
             </MenuItem>
           </MenuItem>
 
-          {/* Booking Receipt */}
-          <MenuItem icon="receipt" label="Booking Receipt" onPress={() => {}} />
-
           {/* Calendar */}
           <MenuItem icon="calendar-outline" label="Calendar" onPress={() => navigateTo('/(tabs)/schedule')} />
           
-          {/* Lab Booking */}
-          <MenuItem icon="flask" label="Lab Booking">
-             <MenuItem icon="add-circle" label="Create Order" isNested />
-             <MenuItem icon="list" label="Order Report" isNested />
-             <MenuItem icon="document" label="Lab Report Details" isNested />
-          </MenuItem>
-
-          {/* Invoice */}
-          <MenuItem icon="cash" label="Invoice">
-             <MenuItem icon="add-circle" label="Create Invoice" isNested />
-             <MenuItem icon="list" label="Invoice List" isNested />
-          </MenuItem>
-
-          {/* Expenses */}
+          {/* Expense/Income */}
           <MenuItem icon="wallet" label="Expense/Income">
               <MenuItem icon="cash" label="Create" isNested />
               <MenuItem icon="document" label="Report" isNested />
           </MenuItem>
+
+          {/* Account */}
+          <MenuItem icon="person-circle" label="Account" onPress={() => {}} />
 
           {/* Reports */}
           <MenuItem icon="folder-open" label="Reports">
@@ -183,24 +207,6 @@ export const SidebarOverlay = () => {
              <MenuItem icon="analytics" label="Event Reports" isNested />
              <MenuItem icon="pie-chart" label="Profit Loss Reports" isNested />
              <MenuItem icon="document" label="Quotation Reports" isNested />
-          </MenuItem>
-
-          {/* Counter Booking */}
-          <MenuItem icon="storefront" label="Counter Booking">
-             <MenuItem icon="cash" label="Material Master" isNested />
-             <MenuItem icon="pricetag" label="Product Master" isNested />
-             <MenuItem icon="log-in" label="Material Entry" isNested />
-             <MenuItem icon="document" label="Material Entry Report" isNested />
-             <MenuItem icon="cart" label="Counter Entry" isNested />
-          </MenuItem>
-
-          {/* Attendance */}
-          <MenuItem icon="finger-print" label="Attendance">
-              <MenuItem icon="people" label="Attendance" isNested onPress={() => navigateTo('/(tabs)/people')} />
-              <MenuItem icon="document" label="Attendance Report" isNested />
-              <MenuItem icon="checkmark-circle" label="Attendance Approval" isNested />
-              <MenuItem icon="cash" label="Salary Slip" isNested />
-              <MenuItem icon="log-out" label="Add Leave" isNested />
           </MenuItem>
 
           <View style={{ height: 60 }} />
@@ -295,5 +301,23 @@ const styles = StyleSheet.create({
   },
   submenuContainer: {
     backgroundColor: 'rgba(0,0,0,0.2)',
-  }
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginVertical: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(255, 75, 75, 0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 75, 75, 0.3)',
+  },
+  logoutText: {
+    color: '#FF4B4B',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 15,
+  },
 });
