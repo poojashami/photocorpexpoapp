@@ -1,33 +1,29 @@
-/**
- * PhotoCorp Royal Theme Configuration
- * Deep Blue, Gold, and Silver accents
- */
-
-const tintColorLight = '#D4AF37';
-const tintColorDark = '#D4AF37';
+const bluePrimary = '#0066FF'; // Bright professional blue
 
 export const Colors = {
   light: {
-    text: '#11181C',
+    text: '#000000',
     background: '#FFFFFF',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
-    card: '#F5F5F5',
-    border: '#E0E0E0',
-    tabBar: '#FFFFFF',
+    tint: '#0066FF',
+    tabIconDefault: '#94A3B8',
+    tabIconSelected: '#0066FF',
+    tabBar: '#0D1426', // Updated to very dark navy based on screenshot
+    card: '#FFFFFF',
+    border: '#F1F5F9',
+    tableHeader: '#0066FF',
+    tableHeaderText: '#FFFFFF',
   },
   dark: {
-    text: '#FFFFFF',
-    background: '#000040', // Deep Navy Blue
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-    card: '#000060', // Slightly lighter blue for cards
-    border: '#D4AF37', // Gold for borders
-    tabBar: '#000030', // Very deep blue
+    text: '#000000', // Keep dark similar for consistency if forced
+    background: '#FFFFFF',
+    tint: '#0066FF',
+    tabIconDefault: '#94A3B8',
+    tabIconSelected: '#0066FF',
+    tabBar: '#0D1426',
+    card: '#FFFFFF',
+    border: '#F1F5F9',
+    tableHeader: '#0066FF',
+    tableHeaderText: '#FFFFFF',
   },
 };
 

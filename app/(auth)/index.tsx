@@ -12,8 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { Storage } from '../../utils/storage';
-
-const API_BASE_URL = 'http://10.64.185.100:8000/api'; // Updated to Mobile Hotspot IP for Network Access
+import { Config } from '../../constants/Config';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -29,13 +28,12 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('email', email);
-      formData.append('password', password);
-
-      const response = await axios.post(`${API_BASE_URL}/user/login`, formData, {
+      const response = await axios.post(Config.LOGIN_URL, {
+        email: email,
+        password: password
+      }, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
       });
@@ -65,56 +63,44 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#000060', '#000020']}
+        colors={['#F8FAFC', '#E2E8F0']}
         style={styles.gradient}
       >
         <View style={styles.content}>
           {/* Aperture Logo Design */}
-          <View style={styles.logoOuter}>
+          <View style={[styles.logoOuter, { borderColor: '#0066FF' }]}>
              <View style={styles.logoInner}>
-                <Text style={styles.logoText}>PC</Text>
+                <Text style={[styles.logoText, { color: '#0066FF' }]}>PC</Text>
              </View>
           </View>
           
-          <Text style={styles.brandTitle}>PhotoCorp</Text>
-          <Text style={styles.tagline}>BY INDICORP IT SOLUTIONS</Text>
-
-          {/* Ribbon from screenshot */}
-          <View style={styles.ribbonContainer}>
-             <View style={styles.ribbonGoldBorder} />
-             <LinearGradient 
-                colors={['#0033CC', '#0066FF', '#0033CC']} 
-                start={{x: 0, y: 0}} 
-                end={{x: 1, y: 0}}
-                style={styles.ribbonMain} 
-             />
-             <View style={styles.ribbonGoldBorder} />
-          </View>
-
+          <Text style={[styles.brandTitle, { color: '#0F172A' }]}>PhotoCorp</Text>
+          <Text style={[styles.tagline, { color: '#64748B' }]}>BY INDICORP IT SOLUTIONS</Text>
+          
           <View style={styles.inputContainer}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: '#FFF', color: '#000', borderColor: '#E2E8F0' }]}
               placeholder="Username"
-              placeholderTextColor="rgba(255,255,255,0.5)"
+              placeholderTextColor="#94A3B8"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: '#FFF', color: '#000', borderColor: '#E2E8F0' }]}
               placeholder="Password"
-              placeholderTextColor="rgba(255,255,255,0.5)"
+              placeholderTextColor="#94A3B8"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
             />
             
             <TouchableOpacity 
-              style={[styles.button, loading && { opacity: 0.7 }]} 
+              style={[styles.button, { backgroundColor: '#0066FF' }, loading && { opacity: 0.7 }]} 
               onPress={handleLogin}
               disabled={loading}
             >
-              <Text style={styles.buttonText}>{loading ? 'SIGNING IN...' : 'SIGN IN'}</Text>
+              <Text style={[styles.buttonText, { color: '#FFF' }]}>{loading ? 'SIGNING IN...' : 'SIGN IN'}</Text>
             </TouchableOpacity>
           </View>
 

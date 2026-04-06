@@ -15,7 +15,7 @@ import { ReportService } from '../services/ReportService';
 
 const { width } = Dimensions.get('window');
 
-export default function EnquiryReportScreen() {
+export default function ProfitLossReportScreen() {
   const router = useRouter();
   const [reportData, setReportData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ export default function EnquiryReportScreen() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await ReportService.getEnquiryReports();
+      const response = await ReportService.getProfitLossReports();
       const data = response.data || response;
       setReportData(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -37,7 +37,7 @@ export default function EnquiryReportScreen() {
     }
   };
 
-  const columns = ['#', 'Customer', 'Mobile', 'Function', 'Venue', 'Status'];
+  const columns = ['#', 'Date', 'Income', 'Expense', 'Profit', 'Loss'];
 
   return (
     <View style={styles.container}>
@@ -47,12 +47,12 @@ export default function EnquiryReportScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color="#0F172A" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Enquiries</Text>
+          <Text style={styles.headerTitle}>Financial Statement</Text>
           <View style={{ width: 44 }} />
         </View>
 
         <View style={styles.statsRow}>
-          <Text style={styles.statsLabel}>Total Enquiries:</Text>
+          <Text style={styles.statsLabel}>Total Records:</Text>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{reportData.length}</Text>
           </View>
@@ -64,7 +64,7 @@ export default function EnquiryReportScreen() {
             <Text style={styles.toolText}>Export PDF</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.toolBtn}>
-            <Ionicons name="filter-outline" size={16} color="#0066FF" />
+            <Ionicons name="funnel-outline" size={16} color="#0066FF" />
             <Text style={styles.toolText}>Filters</Text>
           </TouchableOpacity>
         </View>
@@ -74,7 +74,7 @@ export default function EnquiryReportScreen() {
       {loading ? (
         <View style={styles.loader}>
           <ActivityIndicator size="large" color="#0066FF" />
-          <Text style={styles.loaderText}>Loading Enquiries...</Text>
+          <Text style={styles.loaderText}>Calculating P&L...</Text>
         </View>
       ) : (
         <View style={styles.tableWrapper}>
@@ -89,17 +89,11 @@ export default function EnquiryReportScreen() {
                     {reportData.map((row: any, i) => (
                         <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
                             <Text style={[styles.tableCell, { width: 60, color: '#64748B' }]}>{i + 1}</Text>
-                            <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: '500' }]}>{row.customer_name || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.mobile || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.function_name || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.venue || '-'}</Text>
-                            <View style={styles.tableCell}>
-                                <View style={[styles.statusBadge, { backgroundColor: row.status == 1 ? '#DCFCE7' : '#FEE2E2' }]}>
-                                    <Text style={[styles.statusText, { color: row.status == 1 ? '#166534' : '#991B1B' }]}>
-                                        {row.status == 1 ? 'ACTIVE' : 'INACTIVE'}
-                                    </Text>
-                                </View>
-                            </View>
+                            <Text style={[styles.tableCell, { color: '#0F172A' }]}>{row.date || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#166534', fontWeight: 'bold' }]}>₹ {row.income || '0'}</Text>
+                            <Text style={[styles.tableCell, { color: '#991B1B', fontWeight: 'bold' }]}>₹ {row.expense || '0'}</Text>
+                            <Text style={[styles.tableCell, { color: '#166534', fontWeight: 'bold' }]}>₹ {row.profit || '0'}</Text>
+                            <Text style={[styles.tableCell, { color: '#991B1B', fontWeight: 'bold' }]}>₹ {row.loss || '0'}</Text>
                         </View>
                     ))}
                 </ScrollView>
@@ -131,6 +125,4 @@ const styles = StyleSheet.create({
   tableHeaderRow: { flexDirection: 'row', backgroundColor: '#0066FF' },
   tableCell: { width: 140, padding: 15, justifyContent: 'center' },
   headerText: { color: '#FFFFFF', fontWeight: 'bold', fontSize: 13 },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, alignItems: 'center' },
-  statusText: { fontSize: 10, fontWeight: 'bold' },
 });

@@ -23,34 +23,23 @@ function TabLayoutInner() {
             tabBarInactiveTintColor: inactiveColor,
             headerShown: false,
             tabBarStyle: {
-            backgroundColor: Colors[colorScheme ?? 'dark'].tabBar,
-            borderTopWidth: 0,
-            elevation: 0,
-            height: 80,
-            paddingBottom: 20,
-            paddingTop: 12,
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
+              backgroundColor: '#0A0E1A', // Dark navy/black bar for light theme
+              borderTopWidth: 0,
+              height: 70,
+              paddingBottom: 12,
+              paddingTop: 10,
             },
             tabBarLabelStyle: {
-            fontSize: 10,
-            fontWeight: '600',
-            marginTop: 4,
-            },
-            tabBarBackground: () => (
-            Platform.OS === 'ios' ? (
-                <BlurView intensity={80} style={StyleSheet.absoluteFill} tint="dark" />
-            ) : null
-            ),
+              fontSize: 10,
+              fontWeight: '600',
+            }
         }}>
         <Tabs.Screen
             name="index"
             options={{
             title: 'Dashboard',
             tabBarIcon: ({ color, focused }) => (
-                <Ionicons name={focused ? "grid" : "grid-outline"} size={24} color={color} />
+                <Ionicons name={focused ? "grid" : "grid-outline"} size={22} color={color} />
             ),
             }}
         />
@@ -59,7 +48,7 @@ function TabLayoutInner() {
             options={{
             title: 'Enquiries',
             tabBarIcon: ({ color, focused }) => (
-                <Ionicons name={focused ? "mail" : "mail-outline"} size={24} color={color} />
+                <Ionicons name={focused ? "mail" : "mail-outline"} size={22} color={color} />
             ),
             }}
         />
@@ -68,7 +57,7 @@ function TabLayoutInner() {
             options={{
             title: 'Booking',
             tabBarIcon: ({ color, focused }) => (
-                <Ionicons name={focused ? "calendar" : "calendar-outline"} size={24} color={color} />
+                <Ionicons name={focused ? "calendar" : "calendar-outline"} size={22} color={color} />
             ),
             }}
         />
@@ -77,7 +66,16 @@ function TabLayoutInner() {
             options={{
             title: 'People',
             tabBarIcon: ({ color, focused }) => (
-                <Ionicons name={focused ? "people" : "people-outline"} size={24} color={color} />
+                <Ionicons name={focused ? "people" : "people-outline"} size={22} color={color} />
+            ),
+            }}
+        />
+        <Tabs.Screen
+            name="explore"
+            options={{
+            title: 'explore',
+            tabBarIcon: ({ color, focused }) => (
+                <Ionicons name={focused ? "search" : "search-outline"} size={22} color={color} />
             ),
             }}
         />

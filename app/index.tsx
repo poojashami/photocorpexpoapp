@@ -20,29 +20,29 @@ export default function LandingScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#000040', '#000010']}
+        colors={['#FFFFFF', '#F1F5F9']}
         style={styles.gradient}
       >
         <ImageBackground 
-            source={{ uri: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1000&auto=format&fit=crop' }} 
+            source={{ uri: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1000' }} 
             style={styles.bgImage}
-            imageStyle={{ opacity: 0.15 }}
+            imageStyle={{ opacity: 0.05 }}
         >
             <View style={styles.content}>
                 
                 {/* Logo & Branding */}
                 <Animated.View entering={FadeInDown.delay(300).duration(1000)} style={styles.logoContainer}>
-                    <View style={styles.logoOuter}>
+                    <View style={[styles.logoOuter, { borderColor: '#0066FF' }]}>
                         <View style={styles.logoInner}>
-                            <Text style={styles.logoText}>PC</Text>
+                            <Text style={[styles.logoText, { color: '#0066FF' }]}>PC</Text>
                         </View>
                     </View>
                 </Animated.View>
 
                 <Animated.View entering={FadeInUp.delay(500).duration(1000)} style={styles.textContainer}>
-                    <Text style={styles.brandTitle}>PhotoCorp</Text>
+                    <Text style={[styles.brandTitle, { color: '#0F172A' }]}>PhotoCorp</Text>
                     <Text style={styles.brandSubtitle}>STUDIO MANAGEMENT</Text>
-                    <Text style={styles.tagline}>
+                    <Text style={[styles.tagline, { color: '#64748B' }]}>
                         Streamline your entire photography workflow with our premium administrative dashboard.
                     </Text>
                 </Animated.View>
@@ -55,13 +55,13 @@ export default function LandingScreen() {
                         activeOpacity={0.8}
                     >
                         <LinearGradient
-                            colors={['#D4AF37', '#AA8822']}
+                            colors={['#0066FF', '#0044CC']}
                             style={styles.btnGradient}
                             start={{x: 0, y: 0}}
                             end={{x: 1, y: 0}}
                         >
-                            <Text style={styles.btnText}>Proceed to Login</Text>
-                            <Ionicons name="arrow-forward" size={20} color="#000" />
+                            <Text style={[styles.btnText, { color: '#FFF' }]}>Proceed to Login</Text>
+                            <Ionicons name="arrow-forward" size={20} color="#FFF" />
                         </LinearGradient>
                     </TouchableOpacity>
                     
