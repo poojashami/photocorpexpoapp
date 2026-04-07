@@ -37,7 +37,7 @@ export default function CrewCeremonyReportScreen() {
     }
   };
 
-  const columns = ['#', 'Ceremony', 'Crew Name', 'Bookings'];
+  const columns = ['#', 'Ceremony ID', 'Ceremony Name', 'Booking Count'];
 
   return (
     <View style={styles.container}>
@@ -89,9 +89,9 @@ export default function CrewCeremonyReportScreen() {
                     {reportData.map((row: any, i) => (
                         <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
                             <Text style={[styles.tableCell, { width: 60, color: '#64748B' }]}>{i + 1}</Text>
-                            <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: '500' }]}>{row.ceremony_name || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.name || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: 'bold' }]}>{row.booking_count || '0'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.ceremony_name || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: '500' }]}>{row.name || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#0066FF', fontWeight: 'bold' }]}>{row.count ?? '0'}</Text>
                         </View>
                     ))}
                 </ScrollView>

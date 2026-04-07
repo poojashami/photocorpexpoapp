@@ -53,7 +53,7 @@ export default function CrewReportScreen() {
     return ids.map(id => skillsMap[id] || id).join(', ');
   };
 
-  const columns = ['#', 'Actions', 'Name', 'Phone', 'Skills', 'Type', 'Status'];
+  const columns = ['#', 'Actions', 'Crew ID', 'Name', 'Phone', 'Email', 'Skills', 'Type', 'Salary', 'Address', 'Status'];
 
   return (
     <View style={styles.container}>
@@ -101,9 +101,17 @@ export default function CrewReportScreen() {
                     {columns.map((col, index) => (
                         <View key={index} style={[
                             styles.tableCell, 
-                            index === 0 && { width: 60 },
-                            col === 'Actions' && { width: 100 },
-                            col === 'Skills' && { width: 220 },
+                            index === 0 && { width: 50 },
+                            col === 'Actions' && { width: 80 },
+                            col === 'Crew ID' && { width: 100 },
+                            col === 'Name' && { width: 150 },
+                            col === 'Phone' && { width: 120 },
+                            col === 'Email' && { width: 180 },
+                            col === 'Skills' && { width: 200 },
+                            col === 'Type' && { width: 120 },
+                            col === 'Salary' && { width: 100 },
+                            col === 'Address' && { width: 250 },
+                            col === 'Status' && { width: 100 },
                         ]}>
                             <Text style={styles.headerText}>{col}</Text>
                         </View>
@@ -113,17 +121,21 @@ export default function CrewReportScreen() {
                 <ScrollView>
                     {reportData.map((row: any, i) => (
                         <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
-                            <Text style={[styles.tableCell, { width: 60, color: '#64748B' }]}>{i + 1}</Text>
-                            <View style={[styles.tableCell, { width: 100, flexDirection: 'row', gap: 10 }]}>
+                            <Text style={[styles.tableCell, { width: 50, color: '#64748B' }]}>{i + 1}</Text>
+                            <View style={[styles.tableCell, { width: 80, flexDirection: 'row', gap: 10 }]}>
                                 <TouchableOpacity onPress={() => router.push({ pathname: '/crew-event-report', params: { id: row.id } })}>
                                     <Ionicons name="eye" size={18} color="#0066FF" />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: '500' }]}>{row.name || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.phone || '-'}</Text>
-                            <Text style={[styles.tableCell, { width: 220, color: '#475569' }]}>{getSkillNames(row.skills)}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.type || '-'}</Text>
-                            <View style={styles.tableCell}>
+                            <Text style={[styles.tableCell, { width: 100, color: '#475569' }]}>{row.crew_id || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 150, color: '#0F172A', fontWeight: '500' }]}>{row.crew_name || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.crew_phone || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 180, color: '#475569' }]}>{row.crew_email || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 200, color: '#475569' }]}>{getSkillNames(row.crew_skills)}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.crew_type || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 100, color: '#475569' }]}>{row.salary ? `₹${row.salary}` : '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 250, color: '#475569' }]}>{row.address ? `${row.address}, ${row.city || ''}, ${row.state || ''} ${row.pincode || ''}` : '-'}</Text>
+                            <View style={[styles.tableCell, { width: 100 }]}>
                                 <View style={[styles.statusBadge, { backgroundColor: row.status == 1 ? '#DCFCE7' : '#FEE2E2' }]}>
                                     <Text style={[styles.statusText, { color: row.status == 1 ? '#166534' : '#991B1B' }]}>
                                         {row.status == 1 ? 'ACTIVE' : 'INACTIVE'}

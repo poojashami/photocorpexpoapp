@@ -37,7 +37,11 @@ export default function CustomerReportScreen() {
     }
   };
 
-  const columns = ['#', 'Name', 'Email', 'Mobile', 'City', 'Type'];
+  const columns = [
+    '#', 'Cust. ID', 'Name', 'Phone', 'Address', 'City', 'State', 'Pincode', 
+    'Email', 'D.O.B', 'Facebook', 'Instagram', 'Alt. Person', 'Alt. Phone', 
+    'Anniversary', 'GST No.', 'Comments'
+  ];
 
   return (
     <View style={styles.container}>
@@ -82,18 +86,39 @@ export default function CustomerReportScreen() {
             <View style={{ minWidth: '100%' }}>
                 <View style={styles.tableHeaderRow}>
                     {columns.map((col, i) => (
-                        <View key={i} style={[styles.tableCell, i === 0 && { width: 60 }]}><Text style={styles.headerText}>{col}</Text></View>
+                        <View key={i} style={[
+                            styles.tableCell, 
+                            i === 0 && { width: 50 },
+                            col === 'Name' && { width: 150 },
+                            col === 'Email' && { width: 180 },
+                            col === 'Address' && { width: 200 },
+                            (col === 'Facebook' || col === 'Instagram') && { width: 120 },
+                            col === 'Comments' && { width: 250 },
+                        ]}>
+                            <Text style={styles.headerText}>{col}</Text>
+                        </View>
                     ))}
                 </View>
                 <ScrollView>
                     {reportData.map((row: any, i) => (
                         <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
-                            <Text style={[styles.tableCell, { width: 60, color: '#64748B' }]}>{i + 1}</Text>
-                            <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: '500' }]}>{row.name || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.email || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.mobile || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 50, color: '#64748B' }]}>{i + 1}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.customer_id || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 150, color: '#0F172A', fontWeight: '500' }]}>{row.customer_name || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.mobile_no || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 200, color: '#475569' }]}>{row.address || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.city || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.type || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.state || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.pincode || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 180, color: '#475569' }]}>{row.customer_email || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.date_of_birth || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.facebook_id || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.instagram || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.contact_person || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.alternate_mobile_no || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.anniversary_date || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.gst_no || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 250, color: '#475569' }]}>{row.comments || '-'}</Text>
                         </View>
                     ))}
                 </ScrollView>

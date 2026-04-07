@@ -13,54 +13,45 @@ import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
-export default function EnquiryReportScreen() {
+export default function CeremonyReportScreen() {
   const router = useRouter();
   
-  // Hardcoded data as requested
+  // Hardcoded data for now
   const [reportData] = useState<any[]>([
     {
-      enquiry_id: 'ENQIND43',
-      enquiry_date: '2025-11-10',
-      lead_type: 'newCustomer',
-      source_of_enquiry: 'Instagram',
-      name: 'Sonal',
-      email_id: 'sonal@test.com',
-      contact_person: 'Nik',
-      mobile_no: '9876543210',
-      is_lead_interested: 'Yes',
-      followup_date: '2025-11-15',
-      event_tentative_date: '2025-11-20',
-      move_to_opportunity: 'No',
-      task_assigned: 'Sales Team',
-      quotation_id: '-',
-      event_id: '3',
-      remarks: 'Interested in anniversary shoot.'
+      startDate: '2025-10-15',
+      startTime: '10:00 AM',
+      ceremonyName: 'Haldi',
+      eventId: 'EVT001',
+      eventName: 'Rahul & Priya Wedding',
+      customerId: 'CUST01',
+      customerName: 'Rahul Sharma',
+      customerPhone: '9876543210',
+      eventFor: 'Groom',
+      services: 'Photography, Videography',
+      crewName: 'Abhishek',
+      crewSkill: 'Photographer'
     },
     {
-      enquiry_id: 'ENQIND44',
-      enquiry_date: '2025-11-12',
-      lead_type: 'Existing',
-      source_of_enquiry: 'Facebook',
-      name: 'Rahul',
-      email_id: 'rahul@test.com',
-      contact_person: 'Rahul',
-      mobile_no: '9988776655',
-      is_lead_interested: 'May be',
-      followup_date: '2025-11-18',
-      event_tentative_date: '2025-11-25',
-      move_to_opportunity: 'No',
-      task_assigned: 'Support',
-      quotation_id: 'Q001',
-      event_id: '1',
-      remarks: 'Looking for wedding packages.'
+        startDate: '2025-10-15',
+        startTime: '04:00 PM',
+        ceremonyName: 'Mehendi',
+        eventId: 'EVT001',
+        eventName: 'Rahul & Priya Wedding',
+        customerId: 'CUST01',
+        customerName: 'Rahul Sharma',
+        customerPhone: '9876543210',
+        eventFor: 'Bride',
+        services: 'Photography',
+        crewName: 'Suresh',
+        crewSkill: 'Assistant'
     }
   ]);
 
   const columns = [
-    '#', 'Enquiry ID', 'Enquiry Date', 'Lead Type', 'Source', 'Name', 
-    'Email ID', 'Contact Person', 'Mobile No', 'Client Int.', 
-    'Follow Up', 'Func. Start Date', 'Opportunity', 'Assigned To', 
-    'Quotation ID', 'Event ID', 'Remarks'
+    '#', 'Start Date', 'Start Time', 'Ceremony', 'Event ID', 'Event Name', 
+    'Cust. ID', 'Cust. Name', 'Cust. Phone', 'Event For', 'Services', 
+    'Crew Name', 'Crew Skill'
   ];
 
   return (
@@ -71,12 +62,12 @@ export default function EnquiryReportScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color="#0F172A" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Enquiry Report</Text>
+          <Text style={styles.headerTitle}>Crew Ceremony</Text>
           <View style={{ width: 44 }} />
         </View>
 
         <View style={styles.statsRow}>
-          <Text style={styles.statsLabel}>Total Enquiries:</Text>
+          <Text style={styles.statsLabel}>Total Ceremonies:</Text>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{reportData.length}</Text>
           </View>
@@ -94,46 +85,41 @@ export default function EnquiryReportScreen() {
         </View>
       </View>
 
-      {/* Table Content */}
+      {/* Table */}
       <View style={styles.tableWrapper}>
         <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>
           <View style={{ minWidth: '100%' }}>
+            {/* Table Header */}
             <View style={styles.tableHeaderRow}>
               {columns.map((col, i) => (
                 <View key={i} style={[
                     styles.tableCell, 
                     i === 0 && { width: 50 },
-                    col === 'Enquiry ID' && { width: 120 },
-                    col === 'Enquiry Date' && { width: 120 },
-                    col === 'Name' && { width: 150 },
-                    col === 'Email ID' && { width: 180 },
-                    col === 'Remarks' && { width: 250 },
+                    (col === 'Event Name' || col === 'Services') && { width: 200 },
+                    col === 'Cust. Name' && { width: 150 },
                 ]}>
                   <Text style={styles.headerText}>{col}</Text>
                 </View>
               ))}
             </View>
 
+            {/* Table Body */}
             <ScrollView>
               {reportData.map((row: any, i) => (
                 <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
                   <Text style={[styles.tableCell, { width: 50, color: '#64748B' }]}>{i + 1}</Text>
-                  <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_id}</Text>
-                  <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_date}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.lead_type}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.source_of_enquiry}</Text>
-                  <Text style={[styles.tableCell, { width: 150, color: '#0F172A', fontWeight: '500' }]}>{row.name}</Text>
-                  <Text style={[styles.tableCell, { width: 180, color: '#475569' }]}>{row.email_id}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.contact_person}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.mobile_no}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.is_lead_interested}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.followup_date}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.event_tentative_date}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.move_to_opportunity}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.task_assigned}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.quotation_id}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.event_id}</Text>
-                  <Text style={[styles.tableCell, { width: 250, color: '#475569' }]}>{row.remarks}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.startDate}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.startTime}</Text>
+                  <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: '500' }]}>{row.ceremonyName}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.eventId}</Text>
+                  <Text style={[styles.tableCell, { width: 200, color: '#475569' }]}>{row.eventName}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.customerId}</Text>
+                  <Text style={[styles.tableCell, { width: 150, color: '#475569' }]}>{row.customerName}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.customerPhone}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.eventFor}</Text>
+                  <Text style={[styles.tableCell, { width: 200, color: '#475569' }]}>{row.services}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.crewName}</Text>
+                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.crewSkill}</Text>
                 </View>
               ))}
             </ScrollView>
@@ -160,6 +146,6 @@ const styles = StyleSheet.create({
   tableWrapper: { flex: 1, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#F1F5F9' },
   tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
   tableHeaderRow: { flexDirection: 'row', backgroundColor: '#0066FF' },
-  tableCell: { width: 130, padding: 15, justifyContent: 'center' },
+  tableCell: { width: 120, padding: 15, justifyContent: 'center' },
   headerText: { color: '#FFFFFF', fontWeight: 'bold', fontSize: 13 },
 });

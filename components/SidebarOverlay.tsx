@@ -150,10 +150,13 @@ export const SidebarOverlay = () => {
               <MenuItem icon="cash" label="Profit & Loss" isNested onPress={() => navigateTo('/profit-loss-report')} />
           </MenuItem>
 
-          <MenuItem icon="folder" label="Reports Sub-Menu">
+          <MenuItem icon="folder" label="Reports">
+             <MenuItem icon="people" label="Customer Reports" isNested onPress={() => navigateTo('/customer-report')} />
+             <MenuItem icon="mail-outline" label="Enquiry Report" isNested onPress={() => navigateTo('/enquiry-report')} />
              <MenuItem icon="people-circle" label="Crew Reports" isNested onPress={() => navigateTo('/crew-report')} />
              <MenuItem icon="calendar" label="Ceremony Reports" isNested onPress={() => navigateTo('/crew-ceremony-report')} />
-             <MenuItem icon="camera" label="Event Details" isNested onPress={() => navigateTo('/crew-event-report')} />
+             <MenuItem icon="calendar-outline" label="Crew Ceremony" isNested onPress={() => navigateTo('/ceremony-report')} />
+             <MenuItem icon="camera" label="Crew Event Report" isNested onPress={() => navigateTo('/crew-event-report')} />
           </MenuItem>
 
           <View style={{ height: 60 }} />

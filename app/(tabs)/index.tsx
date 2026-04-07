@@ -10,11 +10,9 @@ import {
   Modal,
   ActivityIndicator,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInRight, FadeInUp } from 'react-native-reanimated';
 import { Colors } from '../../constants/theme';
-import { useColorScheme } from '../../hooks/use-color-scheme';
 import { useMenu } from '../../context/MenuContext';
 import { ReportService } from '../../services/ReportService';
 import { useRouter } from 'expo-router';
@@ -23,28 +21,29 @@ import { Storage } from '../../utils/storage';
 import { Config } from '../../constants/Config';
 
 const { width } = Dimensions.get('window');
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
-// 1. Premium Mini Stat Card (Soft Blue Light Theme)
-const MiniStatCard = ({ title, value, icon, gradient }: any) => {
+// 1. Premium Mini Stat Card (Clean White Theme)
+const MiniStatCard = ({ title, value, icon }: any) => {
     return (
         <View style={styles.miniStatCard}>
             <View style={[styles.miniStatIconBox, { backgroundColor: '#E6F0FF' }]}>
-                <Ionicons name={icon} size={18} color="#0066FF" />
+                <Ionicons name={icon} size={20} color="#0066FF" />
             </View>
-            <Text style={styles.miniStatValue}>{value}</Text>
-            <Text style={styles.miniStatTitle}>{title}</Text>
+            <View>
+                <Text style={styles.miniStatValue}>{value}</Text>
+                <Text style={styles.miniStatTitle}>{title}</Text>
+            </View>
         </View>
     );
 };
 
-// 2. Horizontal Scroll Notification Card (Light Glass/Bordered)
+// 2. Horizontal Scroll Notification Card
 const NotificationCard = ({ title, items, icon, accentColor }: any) => {
     return (
         <View style={styles.notificationCard}>
             <View style={styles.notifHeader}>
                 <View style={[styles.notifIconCircle, { backgroundColor: accentColor + '15' }]}>
-                    <Ionicons name={icon} size={16} color={accentColor} />
+                    <Ionicons name={icon} size={18} color={accentColor} />
                 </View>
                 <Text style={styles.notifTitle}>{title}</Text>
             </View>
@@ -62,7 +61,7 @@ const NotificationCard = ({ title, items, icon, accentColor }: any) => {
     );
 }
 
-// 3. Sleek Analytics Bar Segment (Clean White)
+// 3. Analytics Card
 const AnalyticsCard = ({ title, icon, data }: any) => {
     const maxVal = data.length > 0 ? Math.max(...data.map((d: any) => d.value)) : 100;
 
@@ -93,7 +92,6 @@ const AnalyticsCard = ({ title, icon, data }: any) => {
 }
 
 export default function DashboardScreen() {
-  const colorScheme = 'light'; // Forcing light theme context
   const theme = Colors.light;
   const { openMenu } = useMenu();
   const router = useRouter();
@@ -117,21 +115,19 @@ export default function DashboardScreen() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-        // Fetching counts from existing report APIs to make dashboard dynamic
         const [enqRes, eventRes, crewRes, plRes] = await Promise.all([
-            ReportService.getEnquiryReports(),
-            ReportService.getEventReports(),
-            ReportService.getCrewReports(),
-            ReportService.getProfitLossReports()
+            ReportService.getEnquiryReports().catch(() => ({ data: [] })),
+            ReportService.getEventReports().catch(() => ({ data: [] })),
+            ReportService.getCrewReports().catch(() => ({ data: { crews: [] } })),
+            ReportService.getProfitLossReports().catch(() => ({ data: [] }))
         ]);
 
-        const enquiries = enqRes.data || enqRes;
-        const bookings = eventRes.data || eventRes;
-        const crews = crewRes.crews || crewRes.data?.crews || [];
-        const plData = Array.isArray(plRes.data) ? plRes.data : (Array.isArray(plRes) ? plRes : []);
+        const enquiries = enqRes.data || enqRes || [];
+        const bookings = eventRes.data || eventRes || [];
+        const crews = crewRes.crews || (crewRes.data && crewRes.data.crews) || [];
+        const plData = plRes.data || plRes || [];
 
-        // Calculate total income for revenue display
-        const totalIncome = plData.reduce((acc: number, item: any) => acc + (parseFloat(item.income) || 0), 0);
+        const totalIncome = Array.isArray(plData) ? plData.reduce((acc: number, item: any) => acc + (parseFloat(item.income) || 0), 0) : 0;
         const revenueFormatted = totalIncome >= 100000 
             ? `₹ ${(totalIncome / 100000).toFixed(1)} L` 
             : `₹ ${totalIncome}`;
@@ -152,36 +148,8 @@ export default function DashboardScreen() {
   const handleLogout = async () => {
     setProfileDropdown(false);
     await Storage.clear(); 
-    try {
-      const token = await Storage.getItem('userToken');
-      if (token) {
-        axios.post(`${Config.API_URL}/user/logout`, {}, {
-          headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${token}` },
-        }).catch(() => {});
-      }
-    } catch (e) {}
-    router.dismissAll();
     router.replace('/(auth)');
   };
-
-  // --- MOCK DATA ---
-  const crewTypeData = [
-    { label: 'Photographer', value: 45, color: '#0066FF' },
-    { label: 'Assistant', value: 30, color: '#4facfe' },
-    { label: 'Editor', value: 25, color: '#00D4FF' },
-  ];
-
-  const cityBookingData = [
-    { label: 'Mumbai', value: 210, color: '#0066FF' },
-    { label: 'Pune', value: 150, color: '#4facfe' },
-    { label: 'Delhi', value: 110, color: '#00D4FF' },
-  ];
-
-  const paymentData = [
-    { label: 'Total Revenue', value: 500000, color: '#10B981' },
-    { label: 'Advance', value: 250000, color: '#3B82F6' },
-    { label: 'Balance', value: 200000, color: '#F59E0B' },
-  ];
 
   const todaysBirthdays = ['Rahul Sharma', 'Priya Singh'];
   const todaysAnniversaries = ['Varma Couple (5th Yr)'];
@@ -189,7 +157,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header */}
+      {/* Header with more spacing */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity onPress={openMenu} style={styles.menuBtn}>
@@ -201,7 +169,6 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Profile Button */}
         <TouchableOpacity style={[styles.profileBtn, { backgroundColor: theme.tint }]} onPress={() => setProfileDropdown(true)}>
           <Ionicons name="person" size={20} color="#FFF" />
         </TouchableOpacity>
@@ -230,7 +197,7 @@ export default function DashboardScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         {loading ? (
-             <View style={[styles.statsGrid, { justifyContent: 'center', paddingVertical: 20 }]}>
+             <View style={[styles.statsGrid, { justifyContent: 'center', minHeight: 120 }]}>
                 <ActivityIndicator color={theme.tint} />
              </View>
         ) : (
@@ -253,9 +220,16 @@ export default function DashboardScreen() {
 
         <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 30 }]}>Analytics Hub</Text>
         <Animated.View entering={FadeInUp.delay(300).duration(800)}>
-            <AnalyticsCard title="Crew Demographics" icon="people" data={crewTypeData} />
-            <AnalyticsCard title="City Dominance" icon="business" data={cityBookingData} />
-            <AnalyticsCard title="Financial Distribution" icon="cash" data={paymentData} />
+            <AnalyticsCard title="Crew Demographics" icon="people" data={[
+                { label: 'Photographer', value: 45, color: '#0066FF' },
+                { label: 'Assistant', value: 30, color: '#4facfe' },
+                { label: 'Editor', value: 25, color: '#00D4FF' },
+            ]} />
+            <AnalyticsCard title="City Dominance" icon="business" data={[
+                { label: 'Mumbai', value: 210, color: '#0066FF' },
+                { label: 'Pune', value: 150, color: '#4facfe' },
+                { label: 'Delhi', value: 110, color: '#00D4FF' },
+            ]} />
         </Animated.View>
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -264,48 +238,60 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: Platform.OS === 'ios' ? 60 : 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 20 },
+  container: { flex: 1, backgroundColor: '#FFFFFF', paddingTop: Platform.OS === 'ios' ? 70 : 60 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 25 },
   greeting: { color: '#94A3B8', fontSize: 13 },
-  userName: { fontSize: 22, fontWeight: 'bold' },
+  userName: { fontSize: 24, fontWeight: 'bold' },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  menuBtn: { marginRight: 15 },
-  profileBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-  scrollContent: { paddingBottom: 20 },
-  sectionHeader: { fontSize: 18, fontWeight: '700', marginHorizontal: 20, marginTop: 10, marginBottom: 15 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 15, justifyContent: 'space-between', marginBottom: 15 },
-  miniStatCard: { width: (width - 45) / 2, padding: 18, borderRadius: 20, marginBottom: 15, backgroundColor: '#FFF', elevation: 3, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8 },
-  miniStatIconBox: { width: 36, height: 36, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  miniStatValue: { color: '#0F172A', fontSize: 20, fontWeight: 'bold', marginBottom: 4 },
-  miniStatTitle: { color: '#64748B', fontSize: 12, fontWeight: '600' },
-  horizontalScroll: { paddingHorizontal: 20, gap: 15 },
-  notificationCard: { width: width * 0.75, backgroundColor: '#FFF', borderRadius: 20, padding: 20, elevation: 3, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, borderWidth: 1, borderColor: '#F1F5F9' },
-  notifHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  notifIconCircle: { width: 32, height: 32, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
-  notifTitle: { color: '#0F172A', fontSize: 16, fontWeight: 'bold' },
-  notifBody: { minHeight: 80 },
-  notifItem: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
-  notifDot: { width: 6, height: 6, borderRadius: 3, marginTop: 6, marginRight: 10 },
-  notifText: { color: '#475569', fontSize: 14, flex: 1, lineHeight: 20 },
+  menuBtn: { marginRight: 15, padding: 5 },
+  profileBtn: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
+  scrollContent: { paddingBottom: 30 },
+  sectionHeader: { fontSize: 20, fontWeight: '800', marginHorizontal: 20, marginTop: 15, marginBottom: 15 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 15, justifyContent: 'space-between', marginBottom: 10 },
+  miniStatCard: { 
+    width: (width - 45) / 2, 
+    flexDirection: 'column',
+    padding: 20, 
+    borderRadius: 24, 
+    marginBottom: 15, 
+    backgroundColor: '#F8FAFC', 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.04, 
+    shadowRadius: 5, 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0' 
+  },
+  miniStatIconBox: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
+  miniStatValue: { color: '#0F172A', fontSize: 22, fontWeight: 'bold', marginBottom: 4 },
+  miniStatTitle: { color: '#64748B', fontSize: 13, fontWeight: '600' },
+  horizontalScroll: { paddingHorizontal: 20, paddingBottom: 10 },
+  notificationCard: { width: width * 0.8, backgroundColor: '#F8FAFC', borderRadius: 24, padding: 22, marginRight: 15, elevation: 2, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 5, borderWidth: 1, borderColor: '#E2E8F0' },
+  notifHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
+  notifIconCircle: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  notifTitle: { color: '#011F41', fontSize: 17, fontWeight: 'bold' },
+  notifBody: { minHeight: 60 },
+  notifItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  notifDot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
+  notifText: { color: '#475569', fontSize: 15, flex: 1 },
   emptyText: { color: '#94A3B8', fontStyle: 'italic', fontSize: 13 },
-  analyticsCard: { marginHorizontal: 20, backgroundColor: '#FFF', borderRadius: 20, padding: 20, marginBottom: 20, elevation: 3, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8 },
+  analyticsCard: { marginHorizontal: 20, backgroundColor: '#F8FAFC', borderRadius: 24, padding: 24, marginBottom: 20, elevation: 2, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 5, borderWidth: 1, borderColor: '#E2E8F0' },
   analyticsHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#F1F5F9', paddingBottom: 15 },
-  analyticsTitle: { color: '#0F172A', fontSize: 16, fontWeight: 'bold' },
+  analyticsTitle: { color: '#0F172A', fontSize: 17, fontWeight: 'bold' },
   analyticsBody: { marginTop: 5 },
-  barContainer: { marginBottom: 16 },
-  barLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  barLabel: { color: '#64748B', fontSize: 13, fontWeight: '500' },
-  barValue: { color: '#0F172A', fontSize: 14, fontWeight: 'bold' },
-  barBackground: { height: 6, borderRadius: 3, backgroundColor: '#F1F5F9', width: '100%', overflow: 'hidden' },
-  barFill: { height: '100%', borderRadius: 3 },
-  dropOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'flex-start', alignItems: 'flex-end', paddingTop: Platform.OS === 'ios' ? 100 : 80, paddingRight: 15 },
-  dropCard: { borderRadius: 20, padding: 20, width: 260, elevation: 20, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 15 },
-  dropUserInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  dropAvatar: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
-  dropName: { fontSize: 16, fontWeight: 'bold' },
-  dropEmail: { color: '#64748B', fontSize: 12, marginTop: 2 },
-  dropDivider: { height: 1, backgroundColor: '#F1F5F9', marginBottom: 16 },
-  dropLogout: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 12, backgroundColor: '#FEF2F2', borderRadius: 12 },
-  dropLogoutText: { color: '#EF4444', fontSize: 15, fontWeight: 'bold', marginLeft: 12 },
+  barContainer: { marginBottom: 18 },
+  barLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  barLabel: { color: '#64748B', fontSize: 14, fontWeight: '500' },
+  barValue: { color: '#0F172A', fontSize: 15, fontWeight: 'bold' },
+  barBackground: { height: 8, borderRadius: 4, backgroundColor: '#F1F5F9', width: '100%', overflow: 'hidden' },
+  barFill: { height: '100%', borderRadius: 4 },
+  dropOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-start', alignItems: 'flex-end', paddingTop: Platform.OS === 'ios' ? 100 : 80, paddingRight: 15 },
+  dropCard: { borderRadius: 24, padding: 24, width: 280, elevation: 25, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 20 },
+  dropUserInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: 18 },
+  dropAvatar: { width: 54, height: 54, borderRadius: 27, justifyContent: 'center', alignItems: 'center' },
+  dropName: { fontSize: 18, fontWeight: 'bold' },
+  dropEmail: { color: '#64748B', fontSize: 13, marginTop: 4 },
+  dropDivider: { height: 1, backgroundColor: '#F1F5F9', marginBottom: 18 },
+  dropLogout: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 15, backgroundColor: '#FEF2F2', borderRadius: 14 },
+  dropLogoutText: { color: '#EF4444', fontSize: 16, fontWeight: 'bold', marginLeft: 12 },
 });
-

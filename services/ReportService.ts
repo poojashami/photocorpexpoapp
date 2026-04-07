@@ -1,25 +1,24 @@
 import apiClient from './apiClient';
 import { Config } from '../constants/Config';
 
-export const ReportService = {
+export class ReportService {
   /**
    * Fetch active crews lists and details.
    */
-  async getCrewReports() {
+  static async getCrewReports() {
     try {
       const response = await apiClient.get(Config.REPORT_CREW);
-      console.log('Crew API Response:', JSON.stringify(response.data).substring(0, 500));
       return response.data;
     } catch (error) {
       console.error('Error fetching Crew Reports:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch ceremony-wise booking summary.
    */
-  async getCrewCeremonyReports() {
+  static async getCrewCeremonyReports() {
     try {
       const response = await apiClient.get(Config.REPORT_CREW_CEREMONY);
       return response.data;
@@ -27,13 +26,12 @@ export const ReportService = {
       console.error('Error fetching Crew Ceremony Reports:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch details of ceremonies assigned to a specific crew.
-   * @param id Crew ID
    */
-  async getCrewEventDetails(id: string | number) {
+  static async getCrewEventReports(id: string | number) {
     try {
       const response = await apiClient.get(Config.REPORT_CREW_EVENT(id));
       return response.data;
@@ -41,12 +39,12 @@ export const ReportService = {
       console.error('Error fetching Crew Event Details:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch active customers detailed list.
    */
-  async getCustomerReports() {
+  static async getCustomerReports() {
     try {
       const response = await apiClient.get(Config.REPORT_CUSTOMERS);
       return response.data;
@@ -54,12 +52,12 @@ export const ReportService = {
       console.error('Error fetching Customer Reports:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch inquiries list, types, and sources.
    */
-  async getEnquiryReports() {
+  static async getEnquiryReports() {
     try {
       const response = await apiClient.get(Config.REPORT_ENQUIRIES);
       return response.data;
@@ -67,12 +65,12 @@ export const ReportService = {
       console.error('Error fetching Enquiry Reports:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch event booking and ceremony details (Receipt summary).
    */
-  async getEventReports() {
+  static async getEventReports() {
     try {
       const response = await apiClient.get(Config.REPORT_EVENT_BOOKING);
       return response.data;
@@ -80,12 +78,12 @@ export const ReportService = {
       console.error('Error fetching Event Reports:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch complete list of income and expenses.
    */
-  async getProfitLossReports() {
+  static async getProfitLossReports() {
     try {
       const response = await apiClient.get(Config.REPORT_PROFIT_LOSS);
       return response.data;
@@ -93,12 +91,12 @@ export const ReportService = {
       console.error('Error fetching Profit/Loss Reports:', error);
       throw error;
     }
-  },
+  }
 
   /**
    * Fetch all quotations details and status.
    */
-  async getQuotationReports() {
+  static async getQuotationReports() {
     try {
       const response = await apiClient.get(Config.REPORT_QUOTATIONS);
       return response.data;
@@ -106,5 +104,5 @@ export const ReportService = {
       console.error('Error fetching Quotation Reports:', error);
       throw error;
     }
-  },
-};
+  }
+}
