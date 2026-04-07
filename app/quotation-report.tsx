@@ -37,7 +37,7 @@ export default function QuotationReportScreen() {
     }
   };
 
-  const columns = ['#', 'Customer', 'Date', 'Amount', 'Status'];
+  const columns = ['Action', 'Customer', 'Date', 'Amount', 'Status'];
 
   return (
     <View style={styles.container}>
@@ -82,16 +82,40 @@ export default function QuotationReportScreen() {
             <View style={{ minWidth: '100%' }}>
                 <View style={styles.tableHeaderRow}>
                     {columns.map((col, i) => (
-                        <View key={i} style={[styles.tableCell, i === 0 && { width: 60 }]}><Text style={styles.headerText}>{col}</Text></View>
+                        <View key={i} style={[
+                          styles.tableCell, 
+                          col === 'Action' && { width: 80, alignItems: 'center' },
+                          col === 'Amount' && { width: 120 },
+                        ]}>
+                          <Text style={styles.headerText}>{col}</Text>
+                        </View>
                     ))}
                 </View>
                 <ScrollView>
                     {reportData.map((row: any, i) => (
                         <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
-                            <Text style={[styles.tableCell, { width: 60, color: '#64748B' }]}>{i + 1}</Text>
+                            <View style={[styles.tableCell, { width: 80, justifyContent: 'center', alignItems: 'center' }]}>
+                                <TouchableOpacity 
+                                    style={styles.actionIconBtn}
+                                    onPress={() => {
+                                        router.push({
+                                            pathname: '/add-event-booking',
+                                            params: {
+                                                quotation_id: row.quotation_id || row.id,
+                                                customer_name: row.customer_name || '',
+                                                bill_amount: row.amount?.toString() || '',
+                                                customer_id: row.customer_id || '',
+                                                remarks: row.remarks || ''
+                                            }
+                                        });
+                                    }}
+                                >
+                                    <Ionicons name="arrow-forward-circle" size={28} color="#0066FF" />
+                                </TouchableOpacity>
+                            </View>
                             <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: '500' }]}>{row.customer_name || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.date || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#0F172A', fontWeight: 'bold' }]}>₹ {row.amount || '0'}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#0F172A', fontWeight: 'bold' }]}>₹ {row.amount || '0'}</Text>
                             <View style={styles.tableCell}>
                                 <View style={[styles.statusBadge, { backgroundColor: row.status == 1 ? '#DCFCE7' : '#FEE2E2' }]}>
                                     <Text style={[styles.statusText, { color: row.status == 1 ? '#166534' : '#991B1B' }]}>
@@ -132,4 +156,9 @@ const styles = StyleSheet.create({
   headerText: { color: '#FFFFFF', fontWeight: 'bold', fontSize: 13 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, alignItems: 'center' },
   statusText: { fontSize: 10, fontWeight: 'bold' },
+  actionIconBtn: {
+    padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

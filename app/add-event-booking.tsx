@@ -82,19 +82,19 @@ export default function AddEventBookingScreen() {
   
   const [form, setForm] = useState({
     customer_id: (params.customer_id as string) || '',
-    customer_display_id: (params.enquiry_id as string) || '',
+    customer_display_id: (params.quotation_id as string) || (params.enquiry_id as string) || '',
     customer_phone: (params.customer_phone as string) || '',
     customer_name: (params.customer_name as string) || '',
     event_id: 'EVT' + Math.floor(Math.random() * 9000 + 1000), 
     event_name: (params.event_name as string) || (params.event_id as string) || '',
     event_status: 'Booked',
     event_for: (params.lead_for as string) || '',
-    refer_by: params.enquiry_id ? 'Enquiry Reference' : '',
+    refer_by: params.quotation_id ? 'Quotation Reference' : (params.enquiry_id ? 'Enquiry Reference' : ''),
     remark: (params.remarks as string) || '',
-    bill_amount: '',
+    bill_amount: (params.bill_amount as string) || '',
     advanced_taken: '0',
     discount: '',
-    balance_amount: '',
+    balance_amount: (params.bill_amount as string) || '',
     payment_type: '',
     com_business_address_id: '1',
     // Post Production
@@ -128,7 +128,8 @@ export default function AddEventBookingScreen() {
     selectedServices: [] as string[]
   });
 
-  const isWithRef = !!params.enquiry_id;
+  const isWithRef = !!(params.enquiry_id || params.quotation_id);
+  const refType = params.quotation_id ? 'Quotation' : 'Enquiry';
 
   const updateForm = (key: string, value: any) => {
     setForm(prev => {
@@ -171,7 +172,7 @@ export default function AddEventBookingScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color="#0F172A" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{isWithRef ? 'With Reference (Enquiry)' : 'Without Reference'}</Text>
+        <Text style={styles.headerTitle}>{isWithRef ? `With Reference (${refType})` : 'Without Reference'}</Text>
         <View style={{ width: 44 }} />
       </View>
 
