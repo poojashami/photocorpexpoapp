@@ -129,7 +129,7 @@ export const SidebarOverlay = () => {
           <MenuItem icon="document-text" label="Enquiry" onPress={() => navigateTo('/add-enquiry')} />
 
           <MenuItem icon="calendar-check" label="Event Booking">
-              <MenuItem icon="person-remove" label="Without Reference" isNested onPress={() => navigateTo('/event-report')} />
+              <MenuItem icon="person-remove" label="Without Reference" isNested onPress={() => navigateTo('/add-event-booking')} />
               <MenuItem icon="link" label="With Reference" isNested>
                   <MenuItem icon="help-circle" label="Enquiry" isNested onPress={() => navigateTo('/enquiry-report')} />
                   <MenuItem icon="document-text" label="Quotation" isNested onPress={() => navigateTo('/quotation-report')} />

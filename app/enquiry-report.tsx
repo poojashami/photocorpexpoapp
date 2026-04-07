@@ -50,7 +50,7 @@ export default function EnquiryReportScreen() {
   };
 
   const columns = [
-    '#', 'Enquiry ID', 'Enquiry Date', 'Lead Type', 'Source', 'Name', 
+    'Action', 'Enquiry ID', 'Enquiry Date', 'Lead Type', 'Source', 'Name', 
     'Email ID', 'Contact Person', 'Mobile No', 'Client Int.', 
     'Follow Up', 'Func. Start Date', 'Opportunity', 'Assigned To', 
     'Quotation ID', 'Event ID', 'Remarks'
@@ -101,7 +101,7 @@ export default function EnquiryReportScreen() {
                     {columns.map((col, i) => (
                         <View key={i} style={[
                             styles.tableCell, 
-                            i === 0 && { width: 50 },
+                            col === 'Action' && { width: 80, alignItems: 'center' },
                             col === 'Enquiry ID' && { width: 120 },
                             col === 'Enquiry Date' && { width: 120 },
                             col === 'Name' && { width: 150 },
@@ -115,7 +115,28 @@ export default function EnquiryReportScreen() {
                 <ScrollView>
                     {reportData.map((row: any, i) => (
                         <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
-                            <Text style={[styles.tableCell, { width: 50, color: '#64748B' }]}>{i + 1}</Text>
+                            <View style={[styles.tableCell, { width: 80, justifyContent: 'center', alignItems: 'center' }]}>
+                                <TouchableOpacity 
+                                    style={styles.actionIconBtn}
+                                    onPress={() => {
+                                        router.push({
+                                            pathname: '/add-event-booking',
+                                            params: {
+                                                enquiry_id: row.enquiry_id,
+                                                customer_id: row.customer_id || '',
+                                                customer_name: row.get_lead_data?.name || row.get_customer_data?.customer_name || '',
+                                                customer_phone: row.get_lead_data?.mobile_no || row.get_customer_data?.mobile_no || row.mobile_no || '',
+                                                customer_email: row.get_lead_data?.email_id || '',
+                                                event_id: row.event_id || '',
+                                                lead_for: row.lead_for || '',
+                                                remarks: row.remarks || ''
+                                            }
+                                        });
+                                    }}
+                                >
+                                    <Ionicons name="arrow-forward-circle" size={28} color="#0066FF" />
+                                </TouchableOpacity>
+                            </View>
                             <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_id || '-'}</Text>
                             <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_date || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.lead_type || '-'}</Text>
@@ -163,4 +184,9 @@ const styles = StyleSheet.create({
   tableHeaderRow: { flexDirection: 'row', backgroundColor: '#0066FF' },
   tableCell: { width: 130, padding: 15, justifyContent: 'center' },
   headerText: { color: '#FFFFFF', fontWeight: 'bold', fontSize: 13 },
+  actionIconBtn: {
+    padding: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
