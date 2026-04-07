@@ -56,6 +56,17 @@ export default function EnquiryReportScreen() {
     'Quotation ID', 'Event ID', 'Remarks'
   ];
 
+  const formatDate = (val: string) => {
+    if (!val || val === '-') return '-';
+    try {
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return val;
+        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+    } catch (e) {
+        return val;
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -138,7 +149,7 @@ export default function EnquiryReportScreen() {
                                 </TouchableOpacity>
                             </View>
                             <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_id || '-'}</Text>
-                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_date || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{formatDate(row.enquiry_date)}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.lead_type || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.source_of_enquiry || '-'}</Text>
                             <Text style={[styles.tableCell, { width: 150, color: '#0F172A', fontWeight: '500' }]}>{row.get_lead_data?.name || row.get_customer_data?.customer_name || '-'}</Text>
@@ -146,8 +157,8 @@ export default function EnquiryReportScreen() {
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.get_lead_data?.contact_person || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.get_lead_data?.mobile_no || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.is_lead_interested || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.followup_date || '-'}</Text>
-                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.event_tentative_date || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{formatDate(row.followup_date)}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{formatDate(row.event_tentative_date)}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.move_to_opportunity || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.task_assigned || '-'}</Text>
                             <Text style={[styles.tableCell, { color: '#475569' }]}>{row.quotation_id || '-'}</Text>

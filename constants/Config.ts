@@ -22,4 +22,5 @@ export const Config = {
     REPORT_EVENT_BOOKING: `${API_BASE_URL}/events`,
     REPORT_PROFIT_LOSS: `${API_BASE_URL}/expenseGetData`,
     REPORT_QUOTATIONS: `${API_BASE_URL}/getQuotationData`,
+    REPORT_CALENDAR: `${API_BASE_URL}/getCeremony-CalendarData`,
 };

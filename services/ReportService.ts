@@ -105,4 +105,17 @@ export class ReportService {
       throw error;
     }
   }
+
+  /**
+   * Fetch calendar events for ceremonies (FullCalendar compatible data).
+   */
+  static async getCalendarData(start: string, end: string) {
+    try {
+      const response = await apiClient.get(`${Config.REPORT_CALENDAR}?start=${start}&end=${end}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching Calendar Data:', error);
+      throw error;
+    }
+  }
 }

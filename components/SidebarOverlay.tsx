@@ -136,6 +136,8 @@ export const SidebarOverlay = () => {
               </MenuItem>
           </MenuItem>
 
+          <MenuItem icon="calendar-outline" label="Ceremony Calendar" onPress={() => navigateTo('/calendar')} />
+
           <MenuItem icon="camera" label="Events">
               <MenuItem icon="list" label="Event List" isNested onPress={() => navigateTo('/event-report')} />
               <MenuItem icon="add" label="New Event" isNested />
