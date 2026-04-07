@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -6,55 +6,48 @@ import {
   ScrollView, 
   TouchableOpacity, 
   Platform, 
+  ActivityIndicator,
   Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { ReportService } from '../services/ReportService';
 
 const { width } = Dimensions.get('window');
 
 export default function EnquiryReportScreen() {
   const router = useRouter();
-  
-  // Hardcoded data as requested
-  const [reportData] = useState<any[]>([
-    {
-      enquiry_id: 'ENQIND43',
-      enquiry_date: '2025-11-10',
-      lead_type: 'newCustomer',
-      source_of_enquiry: 'Instagram',
-      name: 'Sonal',
-      email_id: 'sonal@test.com',
-      contact_person: 'Nik',
-      mobile_no: '9876543210',
-      is_lead_interested: 'Yes',
-      followup_date: '2025-11-15',
-      event_tentative_date: '2025-11-20',
-      move_to_opportunity: 'No',
-      task_assigned: 'Sales Team',
-      quotation_id: '-',
-      event_id: '3',
-      remarks: 'Interested in anniversary shoot.'
-    },
-    {
-      enquiry_id: 'ENQIND44',
-      enquiry_date: '2025-11-12',
-      lead_type: 'Existing',
-      source_of_enquiry: 'Facebook',
-      name: 'Rahul',
-      email_id: 'rahul@test.com',
-      contact_person: 'Rahul',
-      mobile_no: '9988776655',
-      is_lead_interested: 'May be',
-      followup_date: '2025-11-18',
-      event_tentative_date: '2025-11-25',
-      move_to_opportunity: 'No',
-      task_assigned: 'Support',
-      quotation_id: 'Q001',
-      event_id: '1',
-      remarks: 'Looking for wedding packages.'
+  const [reportData, setReportData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await ReportService.getEnquiryReports();
+      console.log('Enquiry API Response:', response);
+      
+      // Based on screenshot, root is a direct array
+      let fetchedList = [];
+      if (Array.isArray(response)) {
+        fetchedList = response;
+      } else if (response && Array.isArray(response.data)) {
+        fetchedList = response.data;
+      } else if (response && Array.isArray(response.enquiries)) {
+        fetchedList = response.enquiries;
+      }
+      
+      setReportData(fetchedList);
+    } catch (error) {
+      console.error('Fetch error:', error);
+      setReportData([]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
   const columns = [
     '#', 'Enquiry ID', 'Enquiry Date', 'Lead Type', 'Source', 'Name', 
@@ -83,63 +76,69 @@ export default function EnquiryReportScreen() {
         </View>
 
         <View style={styles.toolbar}>
+          <TouchableOpacity onPress={fetchData} style={styles.toolBtn}>
+            <Ionicons name="refresh-outline" size={16} color="#0066FF" />
+            <Text style={styles.toolText}>Refresh</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.toolBtn}>
             <Ionicons name="download-outline" size={16} color="#0066FF" />
             <Text style={styles.toolText}>Export PDF</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.toolBtn}>
-            <Ionicons name="filter-outline" size={16} color="#0066FF" />
-            <Text style={styles.toolText}>Filters</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Table Content */}
-      <View style={styles.tableWrapper}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={{ minWidth: '100%' }}>
-            <View style={styles.tableHeaderRow}>
-              {columns.map((col, i) => (
-                <View key={i} style={[
-                    styles.tableCell, 
-                    i === 0 && { width: 50 },
-                    col === 'Enquiry ID' && { width: 120 },
-                    col === 'Enquiry Date' && { width: 120 },
-                    col === 'Name' && { width: 150 },
-                    col === 'Email ID' && { width: 180 },
-                    col === 'Remarks' && { width: 250 },
-                ]}>
-                  <Text style={styles.headerText}>{col}</Text>
+      {/* Main Data Table */}
+      {loading ? (
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color="#0066FF" />
+          <Text style={styles.loaderText}>Fetching Enquiries...</Text>
+        </View>
+      ) : (
+        <View style={styles.tableWrapper}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>
+            <View style={{ minWidth: '100%' }}>
+                <View style={styles.tableHeaderRow}>
+                    {columns.map((col, i) => (
+                        <View key={i} style={[
+                            styles.tableCell, 
+                            i === 0 && { width: 50 },
+                            col === 'Enquiry ID' && { width: 120 },
+                            col === 'Enquiry Date' && { width: 120 },
+                            col === 'Name' && { width: 150 },
+                            col === 'Email ID' && { width: 180 },
+                            col === 'Remarks' && { width: 250 },
+                        ]}>
+                            <Text style={styles.headerText}>{col}</Text>
+                        </View>
+                    ))}
                 </View>
-              ))}
+                <ScrollView>
+                    {reportData.map((row: any, i) => (
+                        <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
+                            <Text style={[styles.tableCell, { width: 50, color: '#64748B' }]}>{i + 1}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_id || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_date || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.lead_type || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.source_of_enquiry || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 150, color: '#0F172A', fontWeight: '500' }]}>{row.get_lead_data?.name || row.get_customer_data?.customer_name || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 180, color: '#475569' }]}>{row.get_lead_data?.email_id || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.get_lead_data?.contact_person || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.get_lead_data?.mobile_no || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.is_lead_interested || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.followup_date || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.event_tentative_date || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.move_to_opportunity || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.task_assigned || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.quotation_id || '-'}</Text>
+                            <Text style={[styles.tableCell, { color: '#475569' }]}>{row.event_id || '-'}</Text>
+                            <Text style={[styles.tableCell, { width: 250, color: '#475569' }]}>{row.remarks || '-'}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
             </View>
-
-            <ScrollView>
-              {reportData.map((row: any, i) => (
-                <View key={i} style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }]}>
-                  <Text style={[styles.tableCell, { width: 50, color: '#64748B' }]}>{i + 1}</Text>
-                  <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_id}</Text>
-                  <Text style={[styles.tableCell, { width: 120, color: '#475569' }]}>{row.enquiry_date}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.lead_type}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.source_of_enquiry}</Text>
-                  <Text style={[styles.tableCell, { width: 150, color: '#0F172A', fontWeight: '500' }]}>{row.name}</Text>
-                  <Text style={[styles.tableCell, { width: 180, color: '#475569' }]}>{row.email_id}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.contact_person}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.mobile_no}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.is_lead_interested}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.followup_date}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.event_tentative_date}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.move_to_opportunity}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.task_assigned}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.quotation_id}</Text>
-                  <Text style={[styles.tableCell, { color: '#475569' }]}>{row.event_id}</Text>
-                  <Text style={[styles.tableCell, { width: 250, color: '#475569' }]}>{row.remarks}</Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        </ScrollView>
-      </View>
+          </ScrollView>
+        </View>
+      )}
     </View>
   );
 }
@@ -157,6 +156,8 @@ const styles = StyleSheet.create({
   toolbar: { flexDirection: 'row', gap: 10 },
   toolBtn: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderRadius: 10, borderColor: '#E2E8F0', backgroundColor: '#F8FAFC' },
   toolText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: '#0066FF' },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loaderText: { color: '#64748B', marginTop: 10 },
   tableWrapper: { flex: 1, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#F1F5F9' },
   tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
   tableHeaderRow: { flexDirection: 'row', backgroundColor: '#0066FF' },

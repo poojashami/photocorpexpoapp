@@ -126,19 +126,14 @@ export const SidebarOverlay = () => {
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           <MenuItem icon="grid" label="Dashboard" onPress={() => navigateTo('/(tabs)')} />
           
-          <MenuItem icon="people" label="Customers">
-              <MenuItem icon="add-circle" label="Add New" isNested />
-              <MenuItem icon="people" label="Directory" isNested onPress={() => navigateTo('/customer-report')} />
-          </MenuItem>
+          <MenuItem icon="document-text" label="Enquiry" onPress={() => navigateTo('/add-enquiry')} />
 
-          <MenuItem icon="document-text" label="Enquiries">
-              <MenuItem icon="create" label="New Enquiry" isNested />
-              <MenuItem icon="list" label="All Enquiries" isNested onPress={() => navigateTo('/enquiry-report')} />
-          </MenuItem>
-
-          <MenuItem icon="calendar" label="Bookings">
-              <MenuItem icon="calendar" label="Calendar" isNested onPress={() => navigateTo('/(tabs)/booking')} />
-              <MenuItem icon="document" label="Quotations" isNested onPress={() => navigateTo('/quotation-report')} />
+          <MenuItem icon="calendar-check" label="Event Booking">
+              <MenuItem icon="person-remove" label="Without Reference" isNested onPress={() => navigateTo('/event-report')} />
+              <MenuItem icon="link" label="With Reference" isNested>
+                  <MenuItem icon="help-circle" label="Enquiry" isNested onPress={() => navigateTo('/enquiry-report')} />
+                  <MenuItem icon="document-text" label="Quotation" isNested onPress={() => navigateTo('/quotation-report')} />
+              </MenuItem>
           </MenuItem>
 
           <MenuItem icon="camera" label="Events">

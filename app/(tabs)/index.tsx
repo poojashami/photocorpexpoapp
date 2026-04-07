@@ -209,6 +209,29 @@ export default function DashboardScreen() {
             </Animated.View>
         )}
 
+        <Text style={[styles.sectionHeader, { color: theme.text, marginTop: 10 }]}>Quick Actions</Text>
+        <Animated.View entering={FadeInRight.delay(150).duration(600)} style={styles.quickActionsRow}>
+            <TouchableOpacity 
+                style={[styles.actionCard, { backgroundColor: '#E0EBFF' }]} 
+                onPress={() => router.push('/add-enquiry')}
+            >
+                <View style={[styles.actionIconBox, { backgroundColor: '#0066FF' }]}>
+                    <Ionicons name="add" size={24} color="#FFF" />
+                </View>
+                <Text style={styles.actionText}>Add Enquiry</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+                style={[styles.actionCard, { backgroundColor: '#F0FDF4' }]} 
+                onPress={() => router.push('/crew-report')}
+            >
+                <View style={[styles.actionIconBox, { backgroundColor: '#166534' }]}>
+                    <Ionicons name="people" size={24} color="#FFF" />
+                </View>
+                <Text style={styles.actionText}>Crew Reports</Text>
+            </TouchableOpacity>
+        </Animated.View>
+
         <Text style={[styles.sectionHeader, { color: theme.text }]}>Today's Highlights</Text>
         <Animated.View entering={FadeInRight.delay(200).duration(700)}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
@@ -294,4 +317,20 @@ const styles = StyleSheet.create({
   dropDivider: { height: 1, backgroundColor: '#F1F5F9', marginBottom: 18 },
   dropLogout: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 15, backgroundColor: '#FEF2F2', borderRadius: 14 },
   dropLogoutText: { color: '#EF4444', fontSize: 16, fontWeight: 'bold', marginLeft: 12 },
+  quickActionsRow: { flexDirection: 'row', paddingHorizontal: 15, marginBottom: 10, gap: 12 },
+  actionCard: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    padding: 12, 
+    borderRadius: 20, 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
+  },
+  actionIconBox: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  actionText: { fontSize: 14, fontWeight: 'bold', color: '#0F172A' },
 });

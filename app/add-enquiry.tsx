@@ -7,527 +7,424 @@ import {
   TextInput, 
   TouchableOpacity, 
   Platform, 
-  Modal, 
-  FlatList,
-  Alert
+  Alert,
+  KeyboardAvoidingView,
+  Dimensions,
+  Modal,
+  FlatList
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/theme';
-import { useColorScheme } from '../hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
 
-// Custom Select Component for robust mobile dropdowns
-const CustomSelect = ({ label, value, options, onSelect, disabled = false }: any) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'dark'];
+const { width } = Dimensions.get('window');
 
+// Generic Select Component
+const CustomPicker = ({ label, value, options, onSelect, placeholder = 'Select' }: any) => {
+  const [visible, setVisible] = useState(false);
   const selectedOption = options.find((o: any) => o.value === value);
 
   return (
-    <>
-      <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
+    <View style={styles.inputGroup}>
+      <Text style={styles.label}>{label}</Text>
       <TouchableOpacity 
-        style={[styles.input, { backgroundColor: disabled ? 'rgba(255,255,255,0.05)' : theme.card, borderColor: theme.border, opacity: disabled ? 0.6 : 1 }]} 
-        onPress={() => !disabled && setModalVisible(true)}
+        style={styles.pickerTrigger} 
+        onPress={() => setVisible(true)}
         activeOpacity={0.7}
       >
-        <Text style={{ color: selectedOption ? theme.text : '#888' }}>
-          {selectedOption ? selectedOption.label : 'Select'}
+        <Text style={{ color: selectedOption ? '#0F172A' : '#64748B', fontSize: 15 }}>
+          {selectedOption ? selectedOption.label : placeholder}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#888" />
+        <Ionicons name="chevron-down" size={18} color="#64748B" />
       </TouchableOpacity>
 
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background, borderColor: theme.border }]}>
+      <Modal visible={visible} transparent animationType="fade">
+        <TouchableOpacity 
+            style={styles.modalOverlay} 
+            activeOpacity={1} 
+            onPress={() => setVisible(false)}
+        >
+          <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: theme.text }]}>Select {label}</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close" size={24} color={theme.text} />
-              </TouchableOpacity>
+                <Text style={styles.modalTitle}>{label}</Text>
+                <TouchableOpacity onPress={() => setVisible(false)}>
+                    <Ionicons name="close" size={24} color="#0F172A" />
+                </TouchableOpacity>
             </View>
-            <FlatList 
+            <FlatList
               data={options}
               keyExtractor={(item) => item.value}
               renderItem={({ item }) => (
                 <TouchableOpacity 
-                  style={[styles.modalItem, { borderBottomColor: theme.border }]}
+                  style={styles.modalItem}
                   onPress={() => {
                     onSelect(item.value);
-                    setModalVisible(false);
+                    setVisible(false);
                   }}
                 >
-                  <Text style={[styles.modalItemText, { color: theme.text, fontWeight: value === item.value ? 'bold' : 'normal' }]}>
+                  <Text style={[styles.modalItemText, value === item.value && { color: '#0066FF', fontWeight: 'bold' }]}>
                     {item.label}
                   </Text>
-                  {value === item.value && <Ionicons name="checkmark" size={20} color={theme.tint} />}
+                  {value === item.value && <Ionicons name="checkmark" size={20} color="#0066FF" />}
                 </TouchableOpacity>
               )}
             />
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
-    </>
+    </View>
   );
 };
 
 export default function AddEnquiryScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'dark'];
-
-  // Form States
-  const [leadType, setLeadType] = useState('newCustomer');
-  const [enquiryDate, setEnquiryDate] = useState(new Date().toISOString().split('T')[0]);
-  const [enquiryType, setEnquiryType] = useState('');
-  const [customerId, setCustomerId] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [contactPerson, setContactPerson] = useState('');
-  const [mobileNo, setMobileNo] = useState('');
-  const [emailId, setEmailId] = useState('');
   
-  const [eventId, setEventId] = useState('');
-  const [leadFor, setLeadFor] = useState('');
-  const [selectedCeremonies, setSelectedCeremonies] = useState<string[]>([]);
-  
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [sourceEnquiry, setSourceEnquiry] = useState('');
-  const [sourceRemark, setSourceRemark] = useState('');
-  
-  const [leadInterested, setLeadInterested] = useState('');
-  const [followupDate, setFollowupDate] = useState('');
-  const [moveToOpportunity, setMoveToOpportunity] = useState('');
-  const [taskAssigned, setTaskAssigned] = useState('');
-  const [ivrNo, setIvrNo] = useState('');
-  const [remarks, setRemarks] = useState('');
+  // State from Blade Template
+  const [form, setForm] = useState({
+    enquiry_id: 'ENQIND45', // Mocking max_enq_id
+    lead_type: 'newCustomer',
+    enquiry_date: new Date().toISOString().split('T')[0],
+    enquiry_type: 'Individual',
+    lead_id: '101',
+    customer_name: '',
+    contact_person: '',
+    mobile_no: '',
+    email_id: '',
+    event_id: '',
+    lead_for: '',
+    selectedCeremonies: [] as string[],
+    start_date: '',
+    end_date: '',
+    source: '',
+    source_remark: '',
+    interested: '',
+    followup_date: '',
+    opportunity: '',
+    task_assigned: '',
+    ivr_no: '',
+    remarks: ''
+  });
 
-  // Dummy Data for dropdowns
-  const eventOptions = [
-    { label: 'Wedding', value: '1' },
-    { label: 'Pre-Wedding', value: '2' },
-    { label: 'Corporate Event', value: '3' },
-    { label: 'Birthday', value: '4' },
-    { label: 'Other', value: 'other' },
-  ];
-
-  // Dynamic Data Mapping for Ceremonies based on Event ID
-  const eventCeremonyMap: Record<string, {id: string, name: string}[]> = {
-    '1': [ // Wedding
-      { id: '1', name: 'Haldi' },
-      { id: '2', name: 'Mehendi' },
-      { id: '3', name: 'Sangeet' },
-      { id: '4', name: 'Reception' },
-      { id: '5', name: 'Engagement' },
-      { id: '6', name: 'Wedding Day' },
-    ],
-    '2': [ // Pre-Wedding
-      { id: '7', name: 'Indoor Shoot' },
-      { id: '8', name: 'Outdoor Shoot' },
-    ],
-    '3': [ // Corporate Event
-      { id: '9', name: 'Conference' },
-      { id: '10', name: 'Gala Dinner' },
-      { id: '11', name: 'Award Ceremony' },
-    ],
-    '4': [ // Birthday
-      { id: '12', name: 'Cake Cutting' },
-      { id: '13', name: 'Party' },
-    ],
+  const updateForm = (key: string, value: any) => {
+    setForm(prev => ({ ...prev, [key]: value }));
   };
-
-  const activeCeremonies = eventCeremonyMap[eventId] || [];
-
-  // Reset selected ceremonies when event changes
-  useEffect(() => {
-    setSelectedCeremonies([]);
-  }, [eventId]);
 
   const handleCeremonyToggle = (id: string) => {
-    setSelectedCeremonies(prev => 
-      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
-    );
+    const current = [...form.selectedCeremonies];
+    const index = current.indexOf(id);
+    if (index > -1) current.splice(index, 1);
+    else current.push(id);
+    updateForm('selectedCeremonies', current);
   };
 
-  const handleSave = () => {
-    if(!customerName || !mobileNo) {
-        Alert.alert('Validation Error', 'Customer Name and Mobile No are required.');
-        return;
+  const ceremonyOptions = [
+    { id: '1', name: 'Haldi' },
+    { id: '2', name: 'Mehendi' },
+    { id: '3', name: 'Sangeet' },
+    { id: '4', name: 'Reception' },
+    { id: '5', name: 'Engagement' },
+    { id: '6', name: 'Wedding Day' },
+  ];
+
+  const handleSubmit = () => {
+    if (!form.customer_name || !form.mobile_no) {
+      Alert.alert('Required Fields', 'Please fill Customer Name and Mobile No');
+      return;
     }
-    Alert.alert('Success', 'Enquiry saved successfully!', [
-        { text: 'OK', onPress: () => router.back() }
+    Alert.alert('Success', 'Enquiry Submitted Successfully!', [
+      { text: 'OK', onPress: () => router.back() }
     ]);
   };
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(tabs)');
-    }
-  };
-
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.container}
+    >
       <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={handleBack} 
-          style={styles.backBtn}
-          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-        >
-          <Ionicons name="arrow-back" size={26} color={theme.text} />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={24} color="#0F172A" />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>Add New Enquiry</Text>
-        <View style={{ width: 40 }} />
+        <Text style={styles.headerTitle}>Add New Enquiry</Text>
+        <View style={{ width: 44 }} />
       </View>
 
-      <ScrollView style={styles.formContainer} contentContainerStyle={{ paddingBottom: 50 }}>
-        
-        <CustomSelect 
-          label="Lead Type *"
-          value={leadType}
-          options={[
-            { label: 'New Customer', value: 'newCustomer' },
-            { label: 'Existing Customer', value: 'existingCustomer' }
-          ]}
-          onSelect={setLeadType}
-        />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>General Information</Text>
 
-        <Text style={[styles.label, { color: theme.text }]}>Enquiry Date *</Text>
-        <TextInput 
-          style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-          value={enquiryDate}
-          onChangeText={setEnquiryDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#888"
-        />
-
-        {/* Conditional Rendering based on Lead Type */}
-        {leadType === 'existingCustomer' && (
-           <>
-            <Text style={[styles.label, { color: theme.text }]}>Customer ID</Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Enquiry ID</Text>
             <TextInput 
-                style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-                value={customerId}
-                onChangeText={setCustomerId}
-                placeholder="Search or enter ID"
-                placeholderTextColor="#888"
+              style={[styles.input, styles.disabledInput]} 
+              value={form.enquiry_id} 
+              editable={false} 
             />
-           </>
-        )}
+          </View>
 
-        <CustomSelect 
-          label="Enquiry Type *"
-          value={enquiryType}
-          options={[
-            { label: 'Individual', value: 'Individual' },
-            { label: 'Corporate', value: 'Corporate' },
-            { label: 'Studio', value: 'Studio' }
-          ]}
-          onSelect={setEnquiryType}
-          disabled={leadType === 'existingCustomer' && customerId !== ''} // Just a visual mock of disabled behavior
-        />
+          <CustomPicker 
+            label="Lead Type *"
+            value={form.lead_type}
+            options={[
+              { label: 'New Customer', value: 'newCustomer' },
+              { label: 'Existing Customer', value: 'existingCustomer' }
+            ]}
+            onSelect={(val: string) => updateForm('lead_type', val)}
+          />
 
-        <Text style={[styles.label, { color: theme.text }]}>Customer Name *</Text>
-        <TextInput 
-            style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-            value={customerName}
-            onChangeText={setCustomerName}
-            placeholder="Enter customer name"
-            placeholderTextColor="#888"
-        />
-
-        <Text style={[styles.label, { color: theme.text }]}>Contact Person</Text>
-        <TextInput 
-            style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-            value={contactPerson}
-            onChangeText={setContactPerson}
-            placeholder="Enter contact person"
-            placeholderTextColor="#888"
-        />
-
-        <Text style={[styles.label, { color: theme.text }]}>Mobile No *</Text>
-        <TextInput 
-            style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-            value={mobileNo}
-            onChangeText={setMobileNo}
-            placeholder="Enter mobile number"
-            placeholderTextColor="#888"
-            keyboardType="numeric"
-            maxLength={10}
-        />
-
-        <Text style={[styles.label, { color: theme.text }]}>Email ID</Text>
-        <TextInput 
-            style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-            value={emailId}
-            onChangeText={setEmailId}
-            placeholder="Enter email address"
-            placeholderTextColor="#888"
-            keyboardType="email-address"
-        />
-
-        {/* Event section */}
-        <CustomSelect 
-          label="Event Name"
-          value={eventId}
-          options={eventOptions}
-          onSelect={setEventId}
-        />
-
-        {eventId === 'other' && (
-          <>
-            <Text style={[styles.label, { color: theme.text }]}>Lead For *</Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Enquiry Date *</Text>
             <TextInput 
-              style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-              value={leadFor}
-              onChangeText={setLeadFor}
-              placeholder="Specify the reason"
-              placeholderTextColor="#888"
+              style={styles.input} 
+              value={form.enquiry_date} 
+              onChangeText={(val) => updateForm('enquiry_date', val)}
+              placeholder="YYYY-MM-DD"
             />
-          </>
-        )}
+          </View>
 
-        {/* Ceremonies Checkboxes conditional on Event */}
-        {activeCeremonies.length > 0 && (
-          <>
-            <Text style={[styles.label, { color: theme.text, marginTop: 10 }]}>Ceremony Name</Text>
-            <View style={styles.ceremonyContainer}>
-              {activeCeremonies.map(ceremony => (
-                <TouchableOpacity 
-                  key={ceremony.id} 
-                  style={styles.checkboxRow}
-                  onPress={() => handleCeremonyToggle(ceremony.id)}
-                >
-                  <View style={[styles.checkbox, { borderColor: theme.tint, backgroundColor: selectedCeremonies.includes(ceremony.id) ? theme.tint : 'transparent' }]}>
-                    {selectedCeremonies.includes(ceremony.id) && <Ionicons name="checkmark" size={14} color="#000" />}
-                  </View>
-                  <Text style={{ color: theme.text, marginLeft: 10 }}>{ceremony.name}</Text>
-                </TouchableOpacity>
-              ))}
+          <CustomPicker 
+            label="Enquiry Type *"
+            value={form.enquiry_type}
+            options={[
+              { label: 'Individual', value: 'Individual' },
+              { label: 'Corporate', value: 'Corporate' },
+              { label: 'Studio', value: 'Studio' }
+            ]}
+            onSelect={(val: string) => updateForm('enquiry_type', val)}
+          />
+
+          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Customer Details</Text>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>{form.lead_type === 'newCustomer' ? 'Customer ID' : 'Search Customer ID'}</Text>
+            <TextInput 
+              style={[styles.input, form.lead_type === 'newCustomer' && styles.disabledInput]} 
+              value={form.lead_id} 
+              editable={form.lead_type !== 'newCustomer'}
+              onChangeText={(val) => updateForm('lead_id', val)}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Customer Name *</Text>
+            <TextInput 
+              style={styles.input} 
+              value={form.customer_name} 
+              onChangeText={(val) => updateForm('customer_name', val)}
+              placeholder="Enter Full Name"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Mobile No *</Text>
+            <TextInput 
+              style={styles.input} 
+              value={form.mobile_no} 
+              onChangeText={(val) => updateForm('mobile_no', val)}
+              placeholder="10 Digit Number"
+              keyboardType="numeric"
+              maxLength={10}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Email ID</Text>
+            <TextInput 
+              style={styles.input} 
+              value={form.email_id} 
+              onChangeText={(val) => updateForm('email_id', val)}
+              placeholder="example@mail.com"
+              keyboardType="email-address"
+            />
+          </View>
+
+          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Event Information</Text>
+
+          <CustomPicker 
+            label="Event Name"
+            value={form.event_id}
+            options={[
+              { label: 'Wedding', value: '1' },
+              { label: 'Pre-Wedding', value: '2' },
+              { label: 'Engagement', value: '3' },
+              { label: 'Other', value: 'other' }
+            ]}
+            onSelect={(val: string) => updateForm('event_id', val)}
+          />
+
+          {form.event_id === 'other' && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Lead For *</Text>
+              <TextInput 
+                style={styles.input} 
+                value={form.lead_for} 
+                onChangeText={(val) => updateForm('lead_for', val)}
+                placeholder="Specify event type"
+              />
             </View>
-          </>
-        )}
+          )}
 
-        {/* Additional Details */}
-        <Text style={[styles.label, { color: theme.text }]}>Function Start Date</Text>
-        <TextInput 
-          style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-          value={startDate}
-          onChangeText={setStartDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#888"
-        />
+          {form.event_id !== '' && (
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Ceremony Names</Text>
+              <View style={styles.ceremonyGrid}>
+                {ceremonyOptions.map(c => (
+                  <TouchableOpacity 
+                    key={c.id} 
+                    style={[
+                        styles.chip, 
+                        form.selectedCeremonies.includes(c.id) && styles.activeChip
+                    ]}
+                    onPress={() => handleCeremonyToggle(c.id)}
+                  >
+                    <Text style={[styles.chipText, form.selectedCeremonies.includes(c.id) && styles.activeChipText]}>
+                      {c.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
 
-        <Text style={[styles.label, { color: theme.text }]}>Function End Date</Text>
-        <TextInput 
-          style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-          value={endDate}
-          onChangeText={setEndDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#888"
-        />
+          <View style={styles.row}>
+            <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
+              <Text style={styles.label}>Start Date</Text>
+              <TextInput 
+                style={styles.input} 
+                value={form.start_date} 
+                onChangeText={(val) => updateForm('start_date', val)}
+                placeholder="YYYY-MM-DD"
+              />
+            </View>
+            <View style={[styles.inputGroup, { flex: 1 }]}>
+              <Text style={styles.label}>End Date</Text>
+              <TextInput 
+                style={styles.input} 
+                value={form.end_date} 
+                onChangeText={(val) => updateForm('end_date', val)}
+                placeholder="YYYY-MM-DD"
+              />
+            </View>
+          </View>
 
-        <CustomSelect 
-          label="Source of Enquiry"
-          value={sourceEnquiry}
-          options={[
-            { label: 'Facebook', value: '1' },
-            { label: 'Instagram', value: '2' },
-            { label: 'Referral', value: '3' }
-          ]}
-          onSelect={setSourceEnquiry}
-        />
+          <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Additional Details</Text>
 
-        <Text style={[styles.label, { color: theme.text }]}>Remark of Source</Text>
-        <TextInput 
-          style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-          value={sourceRemark}
-          onChangeText={setSourceRemark}
-          placeholder="Enter remarks"
-          placeholderTextColor="#888"
-        />
+          <CustomPicker 
+            label="Source"
+            value={form.source}
+            options={[
+              { label: 'Facebook', value: '1' },
+              { label: 'Instagram', value: '2' },
+              { label: 'Google', value: '3' },
+              { label: 'Reference', value: '4' }
+            ]}
+            onSelect={(val: string) => updateForm('source', val)}
+          />
 
-        <CustomSelect 
-          label="Is Lead Interested"
-          value={leadInterested}
-          options={[
-            { label: 'Yes', value: 'Yes' },
-            { label: 'No', value: 'No' },
-            { label: 'Call Again', value: 'Call Again' }
-          ]}
-          onSelect={setLeadInterested}
-        />
+          <CustomPicker 
+            label="Interested?"
+            value={form.interested}
+            options={[
+              { label: 'Yes', value: 'Yes' },
+              { label: 'No', value: 'No' },
+              { label: 'Call Again', value: 'Call Again' }
+            ]}
+            onSelect={(val: string) => updateForm('interested', val)}
+          />
 
-        <Text style={[styles.label, { color: theme.text }]}>Follow Up Date</Text>
-        <TextInput 
-          style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-          value={followupDate}
-          onChangeText={setFollowupDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#888"
-        />
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Follow Up Date</Text>
+            <TextInput 
+              style={styles.input} 
+              value={form.followup_date} 
+              onChangeText={(val) => updateForm('followup_date', val)}
+              placeholder="YYYY-MM-DD"
+            />
+          </View>
 
-        <CustomSelect 
-          label="Move to Opportunity"
-          value={moveToOpportunity}
-          options={[
-            { label: 'Yes', value: 'Yes' },
-            { label: 'No', value: 'No' }
-          ]}
-          onSelect={setMoveToOpportunity}
-        />
+          <CustomPicker 
+            label="Task Assigned"
+            value={form.task_assigned}
+            options={[
+              { label: 'Admin User', value: '1' },
+              { label: 'Sales Team', value: '2' }
+            ]}
+            onSelect={(val: string) => updateForm('task_assigned', val)}
+          />
 
-        <CustomSelect 
-          label="Task Assign To"
-          value={taskAssigned}
-          options={[
-            { label: 'Admin', value: '1' },
-            { label: 'Editor', value: '2' }
-          ]}
-          onSelect={setTaskAssigned}
-        />
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Remarks</Text>
+            <TextInput 
+              style={[styles.input, styles.textArea]} 
+              value={form.remarks} 
+              onChangeText={(val) => updateForm('remarks', val)}
+              placeholder="Add any specific requirements..."
+              multiline
+              numberOfLines={3}
+            />
+          </View>
 
-        <Text style={[styles.label, { color: theme.text }]}>IVR Number</Text>
-        <TextInput 
-          style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]} 
-          value={ivrNo}
-          onChangeText={setIvrNo}
-          placeholder="Enter IVR Number"
-          placeholderTextColor="#888"
-        />
-        
-        <Text style={[styles.label, { color: theme.text }]}>Remarks</Text>
-        <TextInput 
-          style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border, height: 80, textAlignVertical: 'top' }]} 
-          value={remarks}
-          onChangeText={setRemarks}
-          placeholder="Enter detailed remarks"
-          placeholderTextColor="#888"
-          multiline
-        />
-
-        <TouchableOpacity style={styles.submitBtn} onPress={handleSave}>
-           <Text style={styles.submitBtnText}>SAVE ENQUIRY</Text>
-        </TouchableOpacity>
-
+          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+            <Text style={styles.submitBtnText}>Submit Enquiry</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingTop: Platform.OS === 'ios' ? 60 : 40, 
+    paddingBottom: 20, 
+    backgroundColor: '#FFFFFF' 
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)'
+  backBtn: { padding: 5, marginLeft: -10 },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', color: '#0F172A' },
+  scrollContent: { padding: 15 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 20, padding: 20, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10, elevation: 2 },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#0066FF', marginBottom: 20, textTransform: 'uppercase', letterSpacing: 1 },
+  inputGroup: { marginBottom: 15 },
+  label: { fontSize: 14, fontWeight: '600', color: '#64748B', marginBottom: 8 },
+  input: { 
+    backgroundColor: '#F8FAFC', 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0', 
+    borderRadius: 12, 
+    paddingHorizontal: 15, 
+    paddingVertical: 12, 
+    fontSize: 15, 
+    color: '#0F172A' 
   },
-  backBtn: {
-    padding: 10,
-    zIndex: 10,
+  disabledInput: { backgroundColor: '#F1F5F9', color: '#94A3B8' },
+  pickerTrigger: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    backgroundColor: '#F8FAFC', 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0', 
+    borderRadius: 12, 
+    paddingHorizontal: 15, 
+    paddingVertical: 14 
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  formContainer: {
-    flex: 1,
-    padding: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    marginTop: 15,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-    fontSize: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  ceremonyContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '50%',
-    marginBottom: 15,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  submitBtn: {
-    backgroundColor: '#D4AF37',
-    padding: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 50,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  submitBtnText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 16,
-    letterSpacing: 1,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderWidth: 1,
-    paddingBottom: 40,
-    maxHeight: '60%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)'
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  modalItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
-    borderBottomWidth: 1,
-  },
-  modalItemText: {
-    fontSize: 16,
-  }
+  textArea: { minHeight: 80, textAlignVertical: 'top' },
+  row: { flexDirection: 'row' },
+  ceremonyGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: '#F1F5F9', borderWidth: 1, borderColor: '#E2E8F0' },
+  activeChip: { backgroundColor: '#E0EBFF', borderColor: '#0066FF' },
+  chipText: { fontSize: 13, color: '#64748B' },
+  activeChipText: { color: '#0066FF', fontWeight: 'bold' },
+  submitBtn: { backgroundColor: '#0066FF', borderRadius: 15, paddingVertical: 18, alignItems: 'center', marginTop: 25 },
+  submitBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 25, borderTopRightRadius: 25, paddingBottom: 40, maxHeight: '70%' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#0F172A' },
+  modalItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  modalItemText: { fontSize: 16, color: '#475569' },
 });
